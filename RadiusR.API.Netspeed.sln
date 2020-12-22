@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "RadiusR.API.Netspeed", "RadiusR.API.Netspeed\", "{69BFB708-5FAE-4F0A-AB17-77D23A37F6B9}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.7.2"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_52348"
+		Debug.AspNetCompiler.PhysicalPath = "RadiusR.API.Netspeed\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_52348\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_52348"
+		Release.AspNetCompiler.PhysicalPath = "RadiusR.API.Netspeed\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_52348\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "52348"
+		SlnRelativePath = "RadiusR.API.Netspeed\"
+		DefaultWebSiteLanguage = "Visual C#"
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{69BFB708-5FAE-4F0A-AB17-77D23A37F6B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69BFB708-5FAE-4F0A-AB17-77D23A37F6B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {639DBD93-E9F9-417C-A859-D98022D9E6F9}
+	EndGlobalSection
+EndGlobal

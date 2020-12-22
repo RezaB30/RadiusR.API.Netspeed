@@ -1,0 +1,1 @@
+﻿<%@ ServiceHost Language="C#" Debug="true" Service="NetspeedService" CodeBehind="~/App_Code/NetspeedService.cs" %>
