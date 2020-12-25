@@ -33,9 +33,13 @@ public interface INetspeedService
     [OperationContract]
     BaseResponse<RadiusR.Address.QueryInterface.AddressDetails, SHA1> GetApartmentAddress(BaseRequest<long, SHA1> baseRequest);
     [OperationContract]
-    BaseResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1> SubscriberGetBills(BaseRequest<SubscriberGetBillsRequest, SHA1> baseRequest);
+    BaseResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1> GetBills(BaseRequest<SubscriberGetBillsRequest, SHA1> baseRequest);
     [OperationContract]
-    BaseResponse<SubscriberPayBillsResponse, SHA1> SubscriberPayBills(BaseRequest<SubscriberPayBillsRequest, SHA1> baseRequest);
+    BaseResponse<SubscriberPayBillsResponse, SHA1> SubscriberPaymentVPOS(BaseRequest<SubscriberPayBillsRequest, SHA1> baseRequest);
     [OperationContract]
-    BaseResponse<ILookup<string, string>, SHA1> NewCustomerRegister(BaseRequest<NewCustomerRegisterRequest, SHA1> baseRequest);
+    BaseResponse<PayBillsResponse, SHA1> PayBills(BaseRequest<PayBillsRequest, SHA1> baseRequest);
+    [OperationContract]
+    BaseResponse<Dictionary<string, string>, SHA1> NewCustomerRegister(BaseRequest<NewCustomerRegisterRequest, SHA1> baseRequest);
+    [OperationContract]
+    BaseResponse<Dictionary<string, string>, SHA1> ExistingCustomerRegister(BaseRequest<ExistingCustomerRegisterRequest, SHA1> baseRequest);
 }

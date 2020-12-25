@@ -1,6 +1,8 @@
-﻿using RadiusR.DB;
+﻿using Newtonsoft.Json;
+using RadiusR.DB;
 using RadiusR.DB.Enums;
 using RadiusR.DB.Utilities.Billing;
+using RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration;
 using RadiusR.VPOS;
 using RezaB.API.WebService;
 using RezaB.TurkTelekom.WebServices.Address;
@@ -14,6 +16,11 @@ using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
 using System.Threading;
+using System.Web.WebPages.Html;
+using System.Web.Mvc;
+using System.Web.Mvc.Html;
+using RezaB.Web.VPOS;
+using NLog;
 
 // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "Service" in code, svc and config file together.
 public class NetspeedService : INetspeedService
@@ -21,6 +28,7 @@ public class NetspeedService : INetspeedService
     string _password = "123456";
     TimeSpan _duration = new TimeSpan(0, 5, 0);
     readonly RadiusR.Address.AddressManager AddressClient = new RadiusR.Address.AddressManager();
+    Logger Errorslogger = LogManager.GetLogger("Errors");
     public BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetProvinces(BaseRequest<string, SHA1> baseRequest)
     {
         var password = _password;
@@ -44,8 +52,9 @@ public class NetspeedService : INetspeedService
                 Username = baseRequest.Username
             };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Errorslogger.Error(ex, "Error Get Provinces");
             return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
         }
     }
@@ -98,6 +107,7 @@ public class NetspeedService : INetspeedService
         }
         catch (Exception ex)
         {
+            Errorslogger.Error(ex, "Error Register Customer Contact");
             return CommonResponse<bool, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
         }
     }
@@ -174,6 +184,7 @@ public class NetspeedService : INetspeedService
         }
         catch (Exception ex)
         {
+            Errorslogger.Error(ex, "Error Service Availability");
             return CommonResponse<ServiceAvailabilityResponse, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
         }
     }
@@ -201,8 +212,9 @@ public class NetspeedService : INetspeedService
                 Username = baseRequest.Username
             };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Errorslogger.Error(ex, "Error Get Province Dsitricts");
             return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
         }
     }
@@ -230,8 +242,9 @@ public class NetspeedService : INetspeedService
                 Username = baseRequest.Username
             };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Errorslogger.Error(ex, "Error Get District Rural Regions");
             return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
         }
     }
@@ -259,8 +272,9 @@ public class NetspeedService : INetspeedService
                 Username = baseRequest.Username
             };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Errorslogger.Error(ex, "Error Get Rural Region Neighbourhoods");
             return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
         }
     }
@@ -288,8 +302,9 @@ public class NetspeedService : INetspeedService
                 Username = baseRequest.Username
             };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Errorslogger.Error(ex, "Error Get Neighbourhood Streets");
             return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
         }
     }
@@ -317,8 +332,9 @@ public class NetspeedService : INetspeedService
                 Username = baseRequest.Username
             };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Errorslogger.Error(ex, "Error Get Street Buildings");
             return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
         }
     }
@@ -346,8 +362,9 @@ public class NetspeedService : INetspeedService
                 Username = baseRequest.Username
             };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Errorslogger.Error(ex, "Error Get Building Apartments");
             return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
         }
     }
@@ -370,13 +387,14 @@ public class NetspeedService : INetspeedService
                 Username = baseRequest.Username
             };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Errorslogger.Error(ex, "Error Get Apartment Address");
             return CommonResponse<RadiusR.Address.QueryInterface.AddressDetails, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
         }
     }
 
-    public BaseResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1> SubscriberGetBills(BaseRequest<SubscriberGetBillsRequest, SHA1> baseRequest)
+    public BaseResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1> GetBills(BaseRequest<SubscriberGetBillsRequest, SHA1> baseRequest)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
@@ -394,18 +412,18 @@ public class NetspeedService : INetspeedService
                     if (dbClient == null)
                         return CommonResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1>.SubscriberNotFoundErrorResponse(passwordHash, baseRequest);
                     var firstUnpaidBill = dbClient.Bills.Where(bill => bill.BillStatusID == (short)RadiusR.DB.Enums.BillState.Unpaid).OrderBy(bill => bill.IssueDate).FirstOrDefault();
-                    var result = dbClient.Bills.OrderByDescending(bill => bill.IssueDate).Select(bill =>
-                    new SubscriberGetBillsResponse()
-                    {
-                        BillDate = bill.IssueDate,
-                        LastPaymentDate = bill.DueDate,
-                        Status = bill.BillStatusID,
-                        ID = bill.ID,
-                        ServiceName = bill.BillFees.Any(bf => bf.FeeTypeID == (short)RadiusR.DB.Enums.FeeType.Tariff) ? bill.BillFees.FirstOrDefault(bf => bf.FeeTypeID == (short)RadiusR.DB.Enums.FeeType.Tariff).Description : "-",
-                        CanBePaid = firstUnpaidBill != null && bill.ID == firstUnpaidBill.ID,
-                        HasEArchiveBill = bill.EBill != null && bill.EBill.EBillType == (short)RadiusR.DB.Enums.EBillType.EArchive,
-                        Total = bill.GetPayableCost().ToString("###,##0.00"),
-                    }
+                    var result = dbClient.Bills.Where(bill => bill.BillStatusID == (short)RadiusR.DB.Enums.BillState.Unpaid).OrderBy(bill => bill.IssueDate).Select(bill =>
+                     new SubscriberGetBillsResponse()
+                     {
+                         BillDate = bill.IssueDate,
+                         LastPaymentDate = bill.DueDate,
+                         Status = bill.BillStatusID,
+                         ID = bill.ID,
+                         ServiceName = bill.BillFees.Any(bf => bf.FeeTypeID == (short)RadiusR.DB.Enums.FeeType.Tariff) ? bill.BillFees.FirstOrDefault(bf => bf.FeeTypeID == (short)RadiusR.DB.Enums.FeeType.Tariff).Description : "-",
+                         CanBePaid = firstUnpaidBill != null && bill.ID == firstUnpaidBill.ID,
+                         HasEArchiveBill = bill.EBill != null && bill.EBill.EBillType == (short)RadiusR.DB.Enums.EBillType.EArchive,
+                         Total = bill.GetPayableCost().ToString("###,##0.00"),
+                     }
                     );
                     return new BaseResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1>(passwordHash, baseRequest)
                     {
@@ -417,80 +435,14 @@ public class NetspeedService : INetspeedService
                 return CommonResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Errorslogger.Error(ex, "Error Get Subscriber unpaid bill list");
             return CommonResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1>.InternalException(passwordHash, baseRequest);
         }
     }
 
-    public BaseResponse<SubscriberPayBillsResponse, SHA1> SubscriberPayBills(BaseRequest<SubscriberPayBillsRequest, SHA1> baseRequest)
-    {
-        //RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration.Registration.RegisterSubscriptionForExistingCustomer()
-        var password = _password;
-        var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
-        //try
-        //{
-        //    if (!baseRequest.HasValidHash(passwordHash, _duration))
-        //    {
-        //        return CommonResponse<SubscriberPayBillsResponse, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
-        //    }
-        //    using (RadiusREntities db = new RadiusREntities())
-        //    {
-        //        var dbSubscription = db.Subscriptions.Where(s => s.SubscriberNo == baseRequest.Data.SubscriberNo).FirstOrDefault();
-        //        if(dbSubscription == null)
-        //            return CommonResponse<SubscriberPayBillsResponse, SHA1>.SubscriberNotFoundErrorResponse(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
-        //        var payableAmount = GetPayableAmount(dbSubscription, baseRequest.Data.id);
-        //        if (payableAmount == 0)
-        //            //payable bill not found
-        //            return CommonResponse<SubscriberPayBillsResponse, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
-
-        //        var tokenKey = VPOSTokenManager.RegisterPaymentToken(new BillPaymentToken()
-        //        {
-        //            SubscriberId = dbSubscription.ID,
-        //            BillID = baseRequest.Data.id
-        //        });
-
-        //        var VPOSModel = VPOSManager.GetVPOSModel(
-        //            new System.Web.Mvc.UrlHelper().Action("VPOSSuccess", null, new { id = tokenKey }, System.Web.HttpContext.Current.Request.Url.Scheme),
-        //            new System.Web.Mvc.UrlHelper().Action("VPOSFail", null, new { id = tokenKey }, System.Web.HttpContext.Current.Request.Url.Scheme),
-        //            payableAmount,
-        //            dbSubscription.Customer.Culture.Split('-').FirstOrDefault(),
-        //            dbSubscription.SubscriberNo + "-" + dbSubscription.ValidDisplayName);
-        //        var helper = new System.Web.Mvc.HtmlHelper<RezaB.Web.VPOS.VPOS3DHostModel>(VPOSModel);
-        //        var html = RezaB.Web.VPOS.VPOS3DHostHelper.VPOS3DHostFormFor(,VPOSModel);
-        //    }
-        //}
-        //catch (Exception)
-        //{
-        //    return CommonResponse<SubscriberPayBillsResponse, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
-        //}
-        return CommonResponse<SubscriberPayBillsResponse, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
-    }
-    private decimal GetPayableAmount(Subscription dbSubscription, long? billId)
-    {
-        // pre-paid sub
-        if (!dbSubscription.HasBilling)
-        {
-            return dbSubscription.GetSubscriberPackageExtentionUnitPrice();
-        }
-        // billed sub
-        var creditsAmount = dbSubscription.SubscriptionCredits.Sum(credit => credit.Amount);
-        var bills = dbSubscription.Bills.Where(bill => bill.BillStatusID == (short)BillState.Unpaid).OrderBy(bill => bill.IssueDate).AsEnumerable();
-        if (billId.HasValue)
-            bills = bills.Where(bill => bill.ID == billId.Value);
-        if (!bills.Any())
-            return 0m;
-
-        var billsAmount = bills.Sum(bill => bill.GetPayableCost());
-        if (!dbSubscription.HasBilling)
-        {
-            billsAmount = dbSubscription.Service.Price;
-        }
-
-        return Math.Max(0m, billsAmount - creditsAmount);
-    }
-
-    public BaseResponse<ILookup<string, string>, SHA1> NewCustomerRegister(BaseRequest<NewCustomerRegisterRequest, SHA1> baseRequest)
+    public BaseResponse<SubscriberPayBillsResponse, SHA1> SubscriberPaymentVPOS(BaseRequest<SubscriberPayBillsRequest, SHA1> baseRequest)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
@@ -498,29 +450,357 @@ public class NetspeedService : INetspeedService
         {
             if (!baseRequest.HasValidHash(passwordHash, _duration))
             {
-                return CommonResponse<ILookup<string, string>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return CommonResponse<SubscriberPayBillsResponse, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+            }
+            using (RadiusREntities db = new RadiusREntities())
+            {
+                var dbSubscription = db.Subscriptions.Where(s => s.SubscriberNo == baseRequest.Data.SubscriberNo).FirstOrDefault();
+                if (dbSubscription == null)
+                    return CommonResponse<SubscriberPayBillsResponse, SHA1>.SubscriberNotFoundErrorResponse(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+                var VPOSModel = VPOSManager.GetVPOSModel(
+                    baseRequest.Data.OkUrl,
+                    baseRequest.Data.FailUrl,
+                    baseRequest.Data.PayableAmount,
+                    dbSubscription.Customer.Culture.Split('-').FirstOrDefault(),
+                    dbSubscription.SubscriberNo + "-" + dbSubscription.ValidDisplayName);
+                var htmlForm = VPOSModel.GetHtmlForm().ToHtmlString();
+                return new BaseResponse<SubscriberPayBillsResponse, SHA1>(passwordHash, baseRequest)
+                {
+                    Data = new SubscriberPayBillsResponse()
+                    {
+                        HtmlForm = htmlForm,
+                    },
+                    Culture = baseRequest.Culture,
+                    ResponseMessage = CommonResponse<SubscriberPayBillsResponse, SHA1>.SuccessResponse(baseRequest.Culture),
+                    Username = baseRequest.Username
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            Errorslogger.Error(ex, "Error Get Subscriber payment VPOS");
+            return CommonResponse<SubscriberPayBillsResponse, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest, ex);
+        }
+    }
+
+    public BaseResponse<Dictionary<string, string>, SHA1> NewCustomerRegister(BaseRequest<NewCustomerRegisterRequest, SHA1> baseRequest)
+    {
+        var password = _password;
+        var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+        try
+        {
+            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            {
+                return CommonResponse<Dictionary<string, string>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
             }
             using (var db = new RadiusR.DB.RadiusREntities())
             {
                 var registeredCustomer = new Customer();
-                var result = RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration.Registration.RegisterSubscriptionWithNewCustomer(db, baseRequest.Data.Registration, out registeredCustomer);
-                if (result == null)
+                var register = baseRequest.Data;
+                CustomerRegistrationInfo registrationInfo = new CustomerRegistrationInfo()
                 {
-                    return new BaseResponse<ILookup<string, string>, SHA1>(passwordHash, baseRequest)
+                    CorporateInfo = register.CorporateCustomerInfo == null ? null : new CustomerRegistrationInfo.CorporateCustomerInfo()
                     {
-                        Data = result,
+                        CentralSystemNo = register.CorporateCustomerInfo.CentralSystemNo,
+                        CompanyAddress = register.CorporateCustomerInfo.CompanyAddress == null ? null : new CustomerRegistrationInfo.AddressInfo()
+                        {
+                            AddressNo = register.CorporateCustomerInfo.CompanyAddress.AddressNo,
+                            AddressText = register.CorporateCustomerInfo.CompanyAddress.AddressText,
+                            ApartmentID = register.CorporateCustomerInfo.CompanyAddress.ApartmentID,
+                            ApartmentNo = register.CorporateCustomerInfo.CompanyAddress.ApartmentNo,
+                            DistrictID = register.CorporateCustomerInfo.CompanyAddress.DistrictID,
+                            DistrictName = register.CorporateCustomerInfo.CompanyAddress.DistrictName,
+                            DoorID = register.CorporateCustomerInfo.CompanyAddress.DoorID,
+                            DoorNo = register.CorporateCustomerInfo.CompanyAddress.DoorNo,
+                            Floor = register.CorporateCustomerInfo.CompanyAddress.Floor,
+                            NeighbourhoodID = register.CorporateCustomerInfo.CompanyAddress.NeighbourhoodID,
+                            NeighbourhoodName = register.CorporateCustomerInfo.CompanyAddress.NeighbourhoodName,
+                            PostalCode = register.CorporateCustomerInfo.CompanyAddress.PostalCode,
+                            ProvinceID = register.CorporateCustomerInfo.CompanyAddress.ProvinceID,
+                            ProvinceName = register.CorporateCustomerInfo.CompanyAddress.ProvinceName,
+                            RuralCode = register.CorporateCustomerInfo.CompanyAddress.RuralCode,
+                            StreetID = register.CorporateCustomerInfo.CompanyAddress.StreetID,
+                            StreetName = register.CorporateCustomerInfo.CompanyAddress.StreetName
+                        },
+                        ExecutiveBirthPlace = register.CorporateCustomerInfo.ExecutiveBirthPlace,
+                        ExecutiveFathersName = register.CorporateCustomerInfo.ExecutiveFathersName,
+                        ExecutiveMothersMaidenName = register.CorporateCustomerInfo.ExecutiveMothersMaidenName,
+                        ExecutiveMothersName = register.CorporateCustomerInfo.ExecutiveMothersName,
+                        ExecutiveNationality = register.CorporateCustomerInfo.ExecutiveNationality,
+                        ExecutiveProfession = register.CorporateCustomerInfo.ExecutiveProfession,
+                        ExecutiveResidencyAddress = register.CorporateCustomerInfo.ExecutiveResidencyAddress == null ? null : new CustomerRegistrationInfo.AddressInfo()
+                        {
+                            AddressNo = register.CorporateCustomerInfo.ExecutiveResidencyAddress.AddressNo,
+                            AddressText = register.CorporateCustomerInfo.ExecutiveResidencyAddress.AddressText,
+                            ApartmentID = register.CorporateCustomerInfo.ExecutiveResidencyAddress.ApartmentID,
+                            ApartmentNo = register.CorporateCustomerInfo.ExecutiveResidencyAddress.ApartmentNo,
+                            DistrictID = register.CorporateCustomerInfo.ExecutiveResidencyAddress.DistrictID,
+                            DistrictName = register.CorporateCustomerInfo.ExecutiveResidencyAddress.DistrictName,
+                            DoorID = register.CorporateCustomerInfo.ExecutiveResidencyAddress.DoorID,
+                            DoorNo = register.CorporateCustomerInfo.ExecutiveResidencyAddress.DoorNo,
+                            Floor = register.CorporateCustomerInfo.ExecutiveResidencyAddress.Floor,
+                            NeighbourhoodID = register.CorporateCustomerInfo.ExecutiveResidencyAddress.NeighbourhoodID,
+                            NeighbourhoodName = register.CorporateCustomerInfo.ExecutiveResidencyAddress.NeighbourhoodName,
+                            PostalCode = register.CorporateCustomerInfo.ExecutiveResidencyAddress.PostalCode,
+                            ProvinceID = register.CorporateCustomerInfo.ExecutiveResidencyAddress.ProvinceID,
+                            ProvinceName = register.CorporateCustomerInfo.ExecutiveResidencyAddress.ProvinceName,
+                            StreetID = register.CorporateCustomerInfo.ExecutiveResidencyAddress.StreetID,
+                            StreetName = register.CorporateCustomerInfo.ExecutiveResidencyAddress.StreetName,
+                            RuralCode = register.CorporateCustomerInfo.ExecutiveResidencyAddress.RuralCode,
+                        },
+                        ExecutiveSex = register.CorporateCustomerInfo.ExecutiveSex,
+                        TaxNo = register.CorporateCustomerInfo.TaxNo,
+                        TaxOffice = register.CorporateCustomerInfo.TaxOffice,
+                        Title = register.CorporateCustomerInfo.Title,
+                        TradeRegistrationNo = register.CorporateCustomerInfo.TradeRegistrationNo
+                    },
+                    GeneralInfo = register.CustomerGeneralInfo == null ? null : new CustomerRegistrationInfo.CustomerGeneralInfo()
+                    {
+                        BillingAddress = register.CustomerGeneralInfo.BillingAddress == null ? null : new CustomerRegistrationInfo.AddressInfo()
+                        {
+                            AddressNo = register.CustomerGeneralInfo.BillingAddress.AddressNo,
+                            AddressText = register.CustomerGeneralInfo.BillingAddress.AddressText,
+                            ApartmentID = register.CustomerGeneralInfo.BillingAddress.ApartmentID,
+                            ApartmentNo = register.CustomerGeneralInfo.BillingAddress.ApartmentNo,
+                            DistrictID = register.CustomerGeneralInfo.BillingAddress.DistrictID,
+                            DistrictName = register.CustomerGeneralInfo.BillingAddress.DistrictName,
+                            DoorID = register.CustomerGeneralInfo.BillingAddress.DoorID,
+                            DoorNo = register.CustomerGeneralInfo.BillingAddress.DoorNo,
+                            Floor = register.CustomerGeneralInfo.BillingAddress.Floor,
+                            NeighbourhoodID = register.CustomerGeneralInfo.BillingAddress.NeighbourhoodID,
+                            NeighbourhoodName = register.CustomerGeneralInfo.BillingAddress.NeighbourhoodName,
+                            PostalCode = register.CustomerGeneralInfo.BillingAddress.PostalCode,
+                            ProvinceID = register.CustomerGeneralInfo.BillingAddress.ProvinceID,
+                            ProvinceName = register.CustomerGeneralInfo.BillingAddress.ProvinceName,
+                            RuralCode = register.CustomerGeneralInfo.BillingAddress.RuralCode,
+                            StreetID = register.CustomerGeneralInfo.BillingAddress.StreetID,
+                            StreetName = register.CustomerGeneralInfo.BillingAddress.StreetName
+                        },
+                        ContactPhoneNo = register.CustomerGeneralInfo.ContactPhoneNo,
+                        Culture = register.CustomerGeneralInfo.Culture,
+                        CustomerType = register.CustomerGeneralInfo.CustomerType,
+                        Email = register.CustomerGeneralInfo.Email,
+                        OtherPhoneNos = register.CustomerGeneralInfo.OtherPhoneNos == null ? null : register.CustomerGeneralInfo.OtherPhoneNos.Select(p => new CustomerRegistrationInfo.PhoneNoListItem()
+                        {
+                            Number = p.Number
+                        })
+                    },
+                    IDCard = register.IDCardInfo == null ? null : new CustomerRegistrationInfo.IDCardInfo()
+                    {
+                        BirthDate = register.IDCardInfo.BirthDate,
+                        CardType = register.IDCardInfo.CardType,
+                        DateOfIssue = register.IDCardInfo.DateOfIssue,
+                        District = register.IDCardInfo.District,
+                        FirstName = register.IDCardInfo.FirstName,
+                        LastName = register.IDCardInfo.LastName,
+                        Neighbourhood = register.IDCardInfo.Neighbourhood,
+                        PageNo = register.IDCardInfo.PageNo,
+                        PassportNo = register.IDCardInfo.PassportNo,
+                        PlaceOfIssue = register.IDCardInfo.PlaceOfIssue,
+                        Province = register.IDCardInfo.Province,
+                        RowNo = register.IDCardInfo.RowNo,
+                        SerialNo = register.IDCardInfo.SerialNo,
+                        TCKNo = register.IDCardInfo.TCKNo,
+                        VolumeNo = register.IDCardInfo.VolumeNo
+                    },
+                    IndividualInfo = register.IndividualCustomerInfo == null ? null : new CustomerRegistrationInfo.IndividualCustomerInfo()
+                    {
+                        BirthPlace = register.IndividualCustomerInfo.BirthPlace,
+                        FathersName = register.IndividualCustomerInfo.FathersName,
+                        MothersMaidenName = register.IndividualCustomerInfo.MothersMaidenName,
+                        MothersName = register.IndividualCustomerInfo.MothersName,
+                        Nationality = register.IndividualCustomerInfo.Nationality,
+                        Profession = register.IndividualCustomerInfo.Profession,
+                        ResidencyAddress = register.IndividualCustomerInfo.ResidencyAddress == null ? null : new CustomerRegistrationInfo.AddressInfo()
+                        {
+                            AddressNo = register.IndividualCustomerInfo.ResidencyAddress.AddressNo,
+                            AddressText = register.IndividualCustomerInfo.ResidencyAddress.AddressText,
+                            ApartmentID = register.IndividualCustomerInfo.ResidencyAddress.ApartmentID,
+                            ApartmentNo = register.IndividualCustomerInfo.ResidencyAddress.ApartmentNo,
+                            DistrictID = register.IndividualCustomerInfo.ResidencyAddress.DistrictID,
+                            DistrictName = register.IndividualCustomerInfo.ResidencyAddress.DistrictName,
+                            DoorID = register.IndividualCustomerInfo.ResidencyAddress.DoorID,
+                            DoorNo = register.IndividualCustomerInfo.ResidencyAddress.DoorNo,
+                            Floor = register.IndividualCustomerInfo.ResidencyAddress.Floor,
+                            NeighbourhoodID = register.IndividualCustomerInfo.ResidencyAddress.NeighbourhoodID,
+                            NeighbourhoodName = register.IndividualCustomerInfo.ResidencyAddress.NeighbourhoodName,
+                            PostalCode = register.IndividualCustomerInfo.ResidencyAddress.PostalCode,
+                            ProvinceID = register.IndividualCustomerInfo.ResidencyAddress.ProvinceID,
+                            ProvinceName = register.IndividualCustomerInfo.ResidencyAddress.ProvinceName,
+                            RuralCode = register.IndividualCustomerInfo.ResidencyAddress.RuralCode,
+                            StreetID = register.IndividualCustomerInfo.ResidencyAddress.StreetID,
+                            StreetName = register.IndividualCustomerInfo.ResidencyAddress.StreetName
+                        },
+                        Sex = register.IndividualCustomerInfo.Sex
+                    },
+                    SubscriptionInfo = register.SubscriptionInfo == null ? null : new CustomerRegistrationInfo.SubscriptionRegistrationInfo()
+                    {
+                        DomainID = register.SubscriptionInfo.DomainID,
+                        ServiceID = register.SubscriptionInfo.ServiceID,
+                        SetupAddress = new CustomerRegistrationInfo.AddressInfo()
+                        {
+                            AddressNo = register.SubscriptionInfo.SetupAddress.AddressNo,
+                            AddressText = register.SubscriptionInfo.SetupAddress.AddressText,
+                            ApartmentID = register.SubscriptionInfo.SetupAddress.ApartmentID,
+                            ApartmentNo = register.SubscriptionInfo.SetupAddress.ApartmentNo,
+                            DistrictID = register.SubscriptionInfo.SetupAddress.DistrictID,
+                            DistrictName = register.SubscriptionInfo.SetupAddress.DistrictName,
+                            DoorID = register.SubscriptionInfo.SetupAddress.DoorID,
+                            DoorNo = register.SubscriptionInfo.SetupAddress.DoorNo,
+                            Floor = register.SubscriptionInfo.SetupAddress.Floor,
+                            NeighbourhoodID = register.SubscriptionInfo.SetupAddress.NeighbourhoodID,
+                            NeighbourhoodName = register.SubscriptionInfo.SetupAddress.NeighbourhoodName,
+                            PostalCode = register.SubscriptionInfo.SetupAddress.PostalCode,
+                            ProvinceID = register.SubscriptionInfo.SetupAddress.ProvinceID,
+                            ProvinceName = register.SubscriptionInfo.SetupAddress.ProvinceName,
+                            RuralCode = register.SubscriptionInfo.SetupAddress.RuralCode,
+                            StreetID = register.SubscriptionInfo.SetupAddress.StreetID,
+                            StreetName = register.SubscriptionInfo.SetupAddress.StreetName
+                        },
+                        BillingPeriod = register.SubscriptionInfo.BillingPeriod
+                    },
+                };
+                var result = RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration.Registration.RegisterSubscriptionWithNewCustomer(db, registrationInfo, out registeredCustomer);
+                Dictionary<string, string> valuePairs = new Dictionary<string, string>();
+
+                if (result != null)
+                {
+                    foreach (var item in result)
+                    {
+                        valuePairs.Add(item.Key, item.FirstOrDefault());
+                    }
+                    return new BaseResponse<Dictionary<string, string>, SHA1>(passwordHash, baseRequest)
+                    {
+                        Data = valuePairs,
                         Culture = baseRequest.Culture,
-                        ResponseMessage = CommonResponse<ILookup<string, string>, SHA1>.SuccessResponse(baseRequest.Culture),
+                        ResponseMessage = CommonResponse<Dictionary<string, string>, SHA1>.FailedResponse(baseRequest.Culture),
                         Username = baseRequest.Username
                     };
                 }
-                return CommonResponse<ILookup<string, string>, SHA1>.Failed(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+                db.Customers.Add(registeredCustomer);
+                db.SaveChanges();
+                return new BaseResponse<Dictionary<string, string>, SHA1>(passwordHash, baseRequest)
+                {
+                    Data = valuePairs,
+                    Culture = baseRequest.Culture,
+                    ResponseMessage = CommonResponse<Dictionary<string, string>, SHA1>.SuccessResponse(baseRequest.Culture),
+                    Username = baseRequest.Username
+                };
             }
-
         }
-        catch (Exception)
+        catch (NullReferenceException ex)
         {
-            return CommonResponse<ILookup<string, string>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+            Errorslogger.Error(ex, "Error Null Reference Exception");
+            return CommonResponse<Dictionary<string, string>, SHA1>.NullObjectException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+        }
+        catch (Exception ex)
+        {
+            Errorslogger.Error(ex, "Error Get new customer register");
+            return CommonResponse<Dictionary<string, string>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+        }
+    }
+
+    public BaseResponse<Dictionary<string, string>, SHA1> ExistingCustomerRegister(BaseRequest<ExistingCustomerRegisterRequest, SHA1> baseRequest)
+    {
+        var password = _password;
+        var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+        try
+        {
+            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            {
+                return CommonResponse<Dictionary<string, string>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+            }
+            using (var db = new RadiusR.DB.RadiusREntities())
+            {
+                var referenceCustomer = db.Subscriptions.Find(baseRequest.Data.SubscriberID);
+                if (referenceCustomer == null)
+                    return CommonResponse<Dictionary<string, string>, SHA1>.SubscriberNotFoundErrorResponse(passwordHash, baseRequest);
+                var result = RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration.Registration.RegisterSubscriptionForExistingCustomer(db, new CustomerRegistrationInfo.SubscriptionRegistrationInfo(), referenceCustomer.Customer);
+                Dictionary<string, string> valuePairs = null;
+                if (result != null)
+                {
+                    foreach (var item in result)
+                    {
+                        valuePairs.Add(item.Key, item.FirstOrDefault());
+                    }
+                    return new BaseResponse<Dictionary<string, string>, SHA1>(passwordHash, baseRequest)
+                    {
+                        Data = valuePairs,
+                        Culture = baseRequest.Culture,
+                        ResponseMessage = CommonResponse<Dictionary<string, string>, SHA1>.FailedResponse(baseRequest.Culture),
+                        Username = baseRequest.Username
+                    };
+                }
+                return new BaseResponse<Dictionary<string, string>, SHA1>(passwordHash, baseRequest)
+                {
+                    Data = valuePairs,
+                    Culture = baseRequest.Culture,
+                    ResponseMessage = CommonResponse<Dictionary<string, string>, SHA1>.SuccessResponse(baseRequest.Culture),
+                    Username = baseRequest.Username
+                };
+            }
+        }
+        catch (NullReferenceException ex)
+        {
+            Errorslogger.Error(ex, "Error Null Reference Exception");
+            return CommonResponse<Dictionary<string, string>, SHA1>.NullObjectException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+        }
+        catch (Exception ex)
+        {
+            Errorslogger.Error(ex, "Error Get new customer register");
+            return CommonResponse<Dictionary<string, string>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+        }
+    }
+
+    public BaseResponse<PayBillsResponse, SHA1> PayBills(BaseRequest<PayBillsRequest, SHA1> baseRequest)
+    {
+        var password = _password;
+        var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+        try
+        {
+            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            {
+                return CommonResponse<PayBillsResponse, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+            }
+            using (RadiusREntities db = new RadiusREntities())
+            {
+                if (baseRequest.Data.BillIds == null)
+                    return CommonResponse<PayBillsResponse, SHA1>.BillsNotFoundException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+                if (baseRequest.Data.BillIds.Count() == 0)
+                    return CommonResponse<PayBillsResponse, SHA1>.BillsNotFoundException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+
+                //var PayableBills = db.Bills.OrderBy(bill => bill.IssueDate).Take(baseRequest.Data.BillIds.Count()).Select(bill => bill.ID).ToArray();
+                //var IsPayable = true;
+                //foreach (var bill in PayableBills)
+                //{
+                //    if (!baseRequest.Data.BillIds.Contains(bill))
+                //    {
+                //        IsPayable = false;
+                //    }
+                //}
+                //if (IsPayable )
+                //{
+
+                //}
+                var Bills = db.Bills.Where(bill => baseRequest.Data.BillIds.Contains(bill.ID)).ToArray();
+                var payResponse = RadiusR.DB.Utilities.Billing.BillPayment.PayBills(db, Bills, PaymentType.VirtualPos, BillPayment.AccountantType.Seller);
+                db.SaveChanges();
+                return new BaseResponse<PayBillsResponse, SHA1>(passwordHash, baseRequest)
+                {
+                    Data = new PayBillsResponse()
+                    {
+                        PaymentResponse = payResponse
+                    },
+                    Culture = baseRequest.Culture,
+                    ResponseMessage = CommonResponse<PayBillsResponse, SHA1>.SuccessResponse(baseRequest.Culture),
+                    Username = baseRequest.Username
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            Errorslogger.Error(ex, "Error pay bills");
+            return CommonResponse<PayBillsResponse, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest, ex);
         }
     }
 }

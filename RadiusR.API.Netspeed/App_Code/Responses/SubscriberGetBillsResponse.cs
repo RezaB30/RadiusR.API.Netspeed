@@ -7,6 +7,7 @@ using System.Web;
 /// <summary>
 /// Summary description for SubscriberGetBillsResponse
 /// </summary>
+[DataContract]
 public class SubscriberGetBillsResponse
 {
     [DataMember]

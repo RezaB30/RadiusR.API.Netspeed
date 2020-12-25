@@ -120,11 +120,17 @@
   <data name="AuthenticationFailed" xml:space="preserve">
     <value>Doğrulama Başarısız</value>
   </data>
+  <data name="BillsNotFound" xml:space="preserve">
+    <value>Fatura id listesi boş olamaz</value>
+  </data>
   <data name="Failed" xml:space="preserve">
     <value>Başarısız</value>
   </data>
   <data name="InternalServerError" xml:space="preserve">
     <value>İç Hata</value>
+  </data>
+  <data name="NullObjectFound" xml:space="preserve">
+    <value>Boş parametre hatası</value>
   </data>
   <data name="SubscriberNotFound" xml:space="preserve">
     <value>Abone bulunamadı</value>

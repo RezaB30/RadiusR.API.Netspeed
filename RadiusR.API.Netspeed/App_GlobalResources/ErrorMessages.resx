@@ -120,11 +120,17 @@
   <data name="AuthenticationFailed" xml:space="preserve">
     <value>Authentication Failed</value>
   </data>
+  <data name="BillsNotFound" xml:space="preserve">
+    <value>Can't be empty bill id list</value>
+  </data>
   <data name="Failed" xml:space="preserve">
     <value>Failed</value>
   </data>
   <data name="InternalServerError" xml:space="preserve">
     <value>Internal Server Error</value>
+  </data>
+  <data name="NullObjectFound" xml:space="preserve">
+    <value>Null object error</value>
   </data>
   <data name="SubscriberNotFound" xml:space="preserve">
     <value>Subscriber not found</value>

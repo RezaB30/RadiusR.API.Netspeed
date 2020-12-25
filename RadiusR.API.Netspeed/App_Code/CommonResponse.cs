@@ -12,7 +12,7 @@ using System.Web;
 /// </summary>
 public static class CommonResponse<T, HAT> where HAT : HashAlgorithm
 {
-    public static BaseResponse<T, HAT> InternalException(string passwordHash, BaseRequest<HAT> baseRequest)
+    public static BaseResponse<T, HAT> InternalException(string passwordHash, BaseRequest<HAT> baseRequest, Exception ex = null)
     {
         return new BaseResponse<T, HAT>(passwordHash, baseRequest)
         {
@@ -20,7 +20,7 @@ public static class CommonResponse<T, HAT> where HAT : HashAlgorithm
             ResponseMessage = new ServiceResponse()
             {
                 ErrorCode = (int)ErrorCodes.InternalServerError,
-                ErrorMessage = ErrorMessages.ResourceManager.GetString(ErrorCodes.InternalServerError.ToString(), CreateCulture(baseRequest.Culture))
+                ErrorMessage = ErrorMessages.ResourceManager.GetString(ErrorCodes.InternalServerError.ToString(), CreateCulture(baseRequest.Culture)) + (ex == null ? "" : $"{ex.Message}")
             }
         };
     }
@@ -48,6 +48,30 @@ public static class CommonResponse<T, HAT> where HAT : HashAlgorithm
             }
         };
     }
+    public static BaseResponse<T, HAT> NullObjectException(string passwordHash, BaseRequest<HAT> baseRequest)
+    {
+        return new BaseResponse<T, HAT>(passwordHash, baseRequest)
+        {
+            Culture = baseRequest.Culture,
+            ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.NullObjectFound,
+                ErrorMessage = ErrorMessages.ResourceManager.GetString(ErrorCodes.NullObjectFound.ToString(), CreateCulture(baseRequest.Culture))
+            }
+        };
+    }
+    public static BaseResponse<T, HAT> BillsNotFoundException(string passwordHash, BaseRequest<HAT> baseRequest)
+    {
+        return new BaseResponse<T, HAT>(passwordHash, baseRequest)
+        {
+            Culture = baseRequest.Culture,
+            ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.BillsNotFound,
+                ErrorMessage = ErrorMessages.ResourceManager.GetString(ErrorCodes.BillsNotFound.ToString(), CreateCulture(baseRequest.Culture))
+            }
+        };
+    }
     public static BaseResponse<T, HAT> Failed(string passwordHash, BaseRequest<HAT> baseRequest)
     {
         return new BaseResponse<T, HAT>(passwordHash, baseRequest)
@@ -66,6 +90,14 @@ public static class CommonResponse<T, HAT> where HAT : HashAlgorithm
         {
             ErrorCode = (int)ErrorCodes.Success,
             ErrorMessage = ErrorMessages.ResourceManager.GetString(ErrorCodes.Success.ToString(), CreateCulture(culture))
+        };
+    }
+    public static ServiceResponse FailedResponse(string culture)
+    {
+        return new ServiceResponse()
+        {
+            ErrorCode = (int)ErrorCodes.Failed,
+            ErrorMessage = ErrorMessages.ResourceManager.GetString(ErrorCodes.Failed.ToString(), CreateCulture(culture))
         };
     }
     private static CultureInfo CreateCulture(string cultureName)
