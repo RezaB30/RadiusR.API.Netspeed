@@ -28,7 +28,7 @@ public class NewCustomerRegisterRequest
 public class IDCardInfo
 {
     [DataMember]
-    public IDCardTypes? CardType { get; set; }
+    public int? CardType { get; set; }
     [DataMember]
     public string PassportNo { get; set; }
     [DataMember]
@@ -62,7 +62,7 @@ public class IDCardInfo
 public class CustomerGeneralInfo
 {
     [DataMember]
-    public CustomerType? CustomerType { get; set; }
+    public int? CustomerType { get; set; }
     [DataMember]
     public string Email { get; set; }
     [DataMember]
@@ -122,9 +122,9 @@ public class AddressInfo
 public class IndividualCustomerInfo
 {
     [DataMember]
-    public Sexes? Sex { get; set; }
+    public int? Sex { get; set; }
     [DataMember]
-    public CountryCodes? Nationality { get; set; }
+    public int? Nationality { get; set; }
     [DataMember]
     public string FathersName { get; set; }
     [DataMember]
@@ -134,7 +134,7 @@ public class IndividualCustomerInfo
     [DataMember]
     public string BirthPlace { get; set; }
     [DataMember]
-    public Profession? Profession { get; set; }
+    public int? Profession { get; set; }
     [DataMember]
     public AddressInfo ResidencyAddress { get; set; }
 }
@@ -159,13 +159,13 @@ public class CorporateCustomerInfo
     [DataMember]
     public string ExecutiveMothersMaidenName { get; set; }
     [DataMember]
-    public Sexes? ExecutiveSex { get; set; }
+    public int? ExecutiveSex { get; set; }
     [DataMember]
-    public CountryCodes? ExecutiveNationality { get; set; }
+    public int? ExecutiveNationality { get; set; }
     [DataMember]
     public string ExecutiveBirthPlace { get; set; }
     [DataMember]
-    public Profession? ExecutiveProfession { get; set; }
+    public int? ExecutiveProfession { get; set; }
     [DataMember]
     public AddressInfo ExecutiveResidencyAddress { get; set; }
     [DataMember]
@@ -180,58 +180,6 @@ public class SubscriptionRegistrationInfo
     public int? ServiceID { get; set; }
     [DataMember]
     public AddressInfo SetupAddress { get; set; }
-    //public string Username { get; set; }
-    //public string StaticIP { get; set; }
     [DataMember]
     public int? BillingPeriod { get; set; }
-    //public IEnumerable<int> GroupIds { get; set; }
-    //public CustomerCommitmentInfo CommitmentInfo { get; set; }
-    //public IEnumerable<SubscriptionAddedFeeItem> AddedFeesInfo { get; set; }
-    //public SubscriptionTelekomInfoDetails TelekomDetailedInfo { get; set; }
-    //public RegisteringPartnerInfo RegisteringPartner { get; set; }
-    //public ReferralDiscountInfo ReferralDiscount { get; set; }
 }
-//public class CustomerCommitmentInfo
-//{
-//    public CommitmentLength? CommitmentLength { get; set; }
-//    public DateTime? CommitmentExpirationDate { get; set; }
-//}
-//public class RegisteringPartnerInfo
-//{
-//    public int? PartnerID { get; set; }
-//    public decimal? Allowance { get; set; }
-//    public decimal? AllowanceThreshold { get; set; }
-//}
-//public class ReferralDiscountInfo
-//{
-//    public string ReferenceNo { get; set; }
-//    public int? SpecialOfferID { get; set; }
-//}
-//public class SubscriptionTelekomInfoDetails
-//{
-//    public string SubscriberNo { get; set; }
-//    public string CustomerCode { get; set; }
-//    public string PSTN { get; set; }
-//    public SubscriptionTelekomTariffInfo TelekomTariffInfo { get; set; }
-//}
-//public class SubscriptionTelekomTariffInfo
-//{
-//    public XDSLType? XDSLType { get; set; }
-//    public int? PacketCode { get; set; }
-//    public int? TariffCode { get; set; }
-//    public bool? IsPaperworkNeeded { get; set; }
-//}
-//public class SubscriptionAddedFeeItem
-//{
-//    public FeeType? FeeType { get; set; }
-//    public int? InstallmentCount { get; set; }
-//    public int? VariantType { get; set; }
-//    public IEnumerable<SubscriptionCustomAddedFeeItem> CustomFeesInfo { get; set; }
-
-//}
-//public class SubscriptionCustomAddedFeeItem
-//{
-//    public string Title { get; set; }
-//    public decimal? Price { get; set; }
-//    public int? InstallmentCount { get; set; }
-//}

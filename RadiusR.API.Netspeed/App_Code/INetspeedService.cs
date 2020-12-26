@@ -13,33 +13,31 @@ using RezaB.API.WebService;
 public interface INetspeedService
 {
     [OperationContract]
-    BaseResponse<bool, SHA1> RegisterCustomerContact(BaseRequest<CustomerContactRequest, SHA1> baseRequest);
+    NetspeedServiceRegisterCustomerContactResponse RegisterCustomerContact(NetspeedServiceCustomerContactRequest request);
     [OperationContract]
-    BaseResponse<ServiceAvailabilityResponse, SHA1> ServiceAvailability(BaseRequest<ServiceAvailabilityRequest, SHA1> baseRequest);
+    NetspeedServiceServiceAvailabilityResponse ServiceAvailability(NetspeedServiceServiceAvailabilityRequest request);
     [OperationContract]
-    BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetProvinces(BaseRequest<string, SHA1> baseRequest);
+    NetspeedServiceArrayListResponse GetProvinces(NetspeedServiceRequests request);
     [OperationContract]
-    BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetProvinceDistricts(BaseRequest<long, SHA1> baseRequest);
+    NetspeedServiceArrayListResponse GetProvinceDistricts(NetspeedServiceArrayListRequest request);
     [OperationContract]
-    BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetDistrictRuralRegions(BaseRequest<long, SHA1> baseRequest);
+    NetspeedServiceArrayListResponse GetDistrictRuralRegions(NetspeedServiceArrayListRequest request);
     [OperationContract]
-    BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetRuralRegionNeighbourhoods(BaseRequest<long, SHA1> baseRequest);
+    NetspeedServiceArrayListResponse GetRuralRegionNeighbourhoods(NetspeedServiceArrayListRequest request);
     [OperationContract]
-    BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetNeighbourhoodStreets(BaseRequest<long, SHA1> baseRequest);
+    NetspeedServiceArrayListResponse GetNeighbourhoodStreets(NetspeedServiceArrayListRequest request);
     [OperationContract]
-    BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetStreetBuildings(BaseRequest<long, SHA1> baseRequest);
+    NetspeedServiceArrayListResponse GetStreetBuildings(NetspeedServiceArrayListRequest request);
     [OperationContract]
-    BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetBuildingApartments(BaseRequest<long, SHA1> baseRequest);
+    NetspeedServiceArrayListResponse GetBuildingApartments(NetspeedServiceArrayListRequest request);
     [OperationContract]
-    BaseResponse<RadiusR.Address.QueryInterface.AddressDetails, SHA1> GetApartmentAddress(BaseRequest<long, SHA1> baseRequest);
+    NetspeedServiceAddressDetailsResponse GetApartmentAddress(NetspeedServiceAddressDetailsRequest request);
     [OperationContract]
-    BaseResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1> GetBills(BaseRequest<SubscriberGetBillsRequest, SHA1> baseRequest);
+    NetspeedServiceSubscriberGetBillsResponse GetBills(NetspeedServiceSubscriberGetBillsRequest request);
     [OperationContract]
-    BaseResponse<SubscriberPayBillsResponse, SHA1> SubscriberPaymentVPOS(BaseRequest<SubscriberPayBillsRequest, SHA1> baseRequest);
+    NetspeedServicePaymentVPOSResponse SubscriberPaymentVPOS(NetspeedServicePaymentVPOSRequest request);
     [OperationContract]
-    BaseResponse<PayBillsResponse, SHA1> PayBills(BaseRequest<PayBillsRequest, SHA1> baseRequest);
+    NetspeedServicePayBillsResponse PayBills(NetspeedServicePayBillsRequest request);
     [OperationContract]
-    BaseResponse<Dictionary<string, string>, SHA1> NewCustomerRegister(BaseRequest<NewCustomerRegisterRequest, SHA1> baseRequest);
-    [OperationContract]
-    BaseResponse<Dictionary<string, string>, SHA1> ExistingCustomerRegister(BaseRequest<ExistingCustomerRegisterRequest, SHA1> baseRequest);
+    NetspeedServiceNewCustomerRegisterResponse NewCustomerRegister(NetspeedServiceNewCustomerRegisterRequest request);
 }

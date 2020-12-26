@@ -29,11 +29,11 @@ public class ServiceAvailabilityResponse
     [DataMember]
     public int? FiberDistance { get; set; }
     [DataMember]
-    public RezaB.TurkTelekom.WebServices.Availability.AvailabilityServiceClient.PortState AdslPortState { get; set; }
+    public string AdslPortState { get; set; }
     [DataMember]
-    public RezaB.TurkTelekom.WebServices.Availability.AvailabilityServiceClient.PortState VdslPortState { get; set; }
+    public string VdslPortState { get; set; }
     [DataMember]
-    public RezaB.TurkTelekom.WebServices.Availability.AvailabilityServiceClient.PortState FiberPortState { get; set; }
+    public string FiberPortState { get; set; }
     [DataMember]
     public string address { get; set; }
     [DataMember]

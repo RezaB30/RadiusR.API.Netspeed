@@ -8,5 +8,6 @@ using System.Web;
 /// </summary>
 public class PayBillsResponse
 {
-    public RadiusR.DB.Utilities.Billing.BillPayment.ResponseType PaymentResponse { get; set; }
+    /*public RadiusR.DB.Utilities.Billing.BillPayment.ResponseType*/
+    public string PaymentResponse { get; set; }
 }

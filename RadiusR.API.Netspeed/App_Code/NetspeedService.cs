@@ -21,6 +21,7 @@ using System.Web.Mvc;
 using System.Web.Mvc.Html;
 using RezaB.Web.VPOS;
 using NLog;
+using System.Globalization;
 
 // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "Service" in code, svc and config file together.
 public class NetspeedService : INetspeedService
@@ -29,57 +30,68 @@ public class NetspeedService : INetspeedService
     TimeSpan _duration = new TimeSpan(0, 5, 0);
     readonly RadiusR.Address.AddressManager AddressClient = new RadiusR.Address.AddressManager();
     Logger Errorslogger = LogManager.GetLogger("Errors");
-    public BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetProvinces(BaseRequest<string, SHA1> baseRequest)
+    public NetspeedServiceArrayListResponse GetProvinces(NetspeedServiceRequests request)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
         try
         {
-            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            if (!request.HasValidHash(passwordHash, _duration))
             {
-                return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Data = null,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                    Username = request.Username
+                };
             }
             var result = AddressClient.GetProvinces();
-            return new BaseResponse<IEnumerable<ValueNamePair>, SHA1>(passwordHash, baseRequest)
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
             {
-                Culture = baseRequest.Culture,
+                Culture = request.Culture,
                 Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                 {
                     Code = p.Code,
                     Name = p.Name
                 }) : Enumerable.Empty<ValueNamePair>(),
-                ResponseMessage = CommonResponse<IEnumerable<ValueNamePair>, SHA1>.SuccessResponse(baseRequest.Culture),
-                Username = baseRequest.Username
+                ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                Username = request.Username
             };
         }
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error Get Provinces");
-            return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                Data = null,
+                ResponseMessage = CommonResponse.InternalException(request.Culture),
+                Username = request.Username
+            };
         }
     }
 
-    public BaseResponse<bool, SHA1> RegisterCustomerContact(BaseRequest<CustomerContactRequest, SHA1> baseRequest)
+    public NetspeedServiceRegisterCustomerContactResponse RegisterCustomerContact(NetspeedServiceCustomerContactRequest request)
     {
-        var password = string.Empty;
+        var password = _password;
+        var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
         try
         {
             using (var db = new RadiusR.DB.RadiusREntities())
             {
-                //get password from db
-                password = _password;
-                var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
-                var IsValid = baseRequest.HasValidHash(passwordHash, _duration);
+                //get password from db                
+                var IsValid = request.HasValidHash(passwordHash, _duration);
                 if (IsValid)
                 {
-                    var description = $"{baseRequest.Data.FullName}{Environment.NewLine}{baseRequest.Data.PhoneNo}";
+                    var description = $"{request.Data.FullName}{Environment.NewLine}{request.Data.PhoneNo}";
                     db.SupportRequests.Add(new RadiusR.DB.SupportRequest()
                     {
                         Date = DateTime.Now,
                         IsVisibleToCustomer = false,
                         StateID = (short)RadiusR.DB.Enums.SupportRequests.SupportRequestStateID.InProgress,
-                        TypeID = baseRequest.Data.RequestTypeID,
-                        SubTypeID = baseRequest.Data.RequestSubTypeID,
+                        TypeID = request.Data.RequestTypeID,
+                        SubTypeID = request.Data.RequestSubTypeID,
                         SupportPin = RadiusR.DB.RandomCode.CodeGenerator.GenerateSupportRequestPIN(),
                         SubscriptionID = null,
                         SupportRequestProgresses =
@@ -94,33 +106,51 @@ public class NetspeedService : INetspeedService
                         }
                     });
                     db.SaveChanges();
-                    return new BaseResponse<bool, SHA1>(passwordHash, baseRequest)
+                    return new NetspeedServiceRegisterCustomerContactResponse(passwordHash, request)
                     {
-                        Culture = baseRequest.Culture,
-                        ResponseMessage = CommonResponse<bool, SHA1>.SuccessResponse(baseRequest.Culture),
+                        Culture = request.Culture,
+                        ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
                         Data = true,
-                        Username = baseRequest.Username
+                        Username = request.Username
                     };
                 }
-                return CommonResponse<bool, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return new NetspeedServiceRegisterCustomerContactResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    Data = false,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
+                };
             }
         }
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error Register Customer Contact");
-            return CommonResponse<bool, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+            return new NetspeedServiceRegisterCustomerContactResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                Data = false,
+                ResponseMessage = CommonResponse.InternalException(request.Culture),
+                Username = request.Username
+            };
         }
     }
 
-    public BaseResponse<ServiceAvailabilityResponse, SHA1> ServiceAvailability(BaseRequest<ServiceAvailabilityRequest, SHA1> baseRequest)
+    public NetspeedServiceServiceAvailabilityResponse ServiceAvailability(NetspeedServiceServiceAvailabilityRequest request)
     {
         var password = _password;
+        var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
         try
         {
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
-            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            if (!request.HasValidHash(passwordHash, _duration))
             {
-                return CommonResponse<ServiceAvailabilityResponse, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return new NetspeedServiceServiceAvailabilityResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    Data = null,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
+                };
             }
             using (var db = new RadiusR.DB.RadiusREntities())
             {
@@ -132,9 +162,9 @@ public class NetspeedService : INetspeedService
                 var queryType = AvailabilityServiceClient.QueryType.BBK;
                 List<Thread> threads = new List<Thread>();
                 RezaB.TurkTelekom.WebServices.ServiceResponse<AvailabilityServiceClient.AvailabilityDescription> availabAdsl = null, availabVdsl = null, availabFiber = null;
-                Thread threadAdsl = new Thread(() => { availabAdsl = client.Check(xdslTypeAdsl, queryType, baseRequest.Data.bbk); });
-                Thread threadVdsl = new Thread(() => { availabVdsl = client.Check(xdslTypeVdsl, queryType, baseRequest.Data.bbk); });
-                Thread threadFiber = new Thread(() => { availabFiber = client.Check(xdslTypeFiber, queryType, baseRequest.Data.bbk); });
+                Thread threadAdsl = new Thread(() => { availabAdsl = client.Check(xdslTypeAdsl, queryType, request.Data.bbk); });
+                Thread threadVdsl = new Thread(() => { availabVdsl = client.Check(xdslTypeVdsl, queryType, request.Data.bbk); });
+                Thread threadFiber = new Thread(() => { availabFiber = client.Check(xdslTypeFiber, queryType, request.Data.bbk); });
                 threadAdsl.Start();
                 threadVdsl.Start();
                 threadFiber.Start();
@@ -152,12 +182,12 @@ public class NetspeedService : INetspeedService
                 var speedVdsl = HasInfrastructureVdsl ? availabVdsl.Data.Description.DSLMaxSpeed.Value : 0;
                 var speedFiber = HasInfrastructureFiber ? availabFiber.Data.Description.DSLMaxSpeed.Value : 0;
                 AddressServiceClient addressServiceClient = new AddressServiceClient(domain.TelekomCredential.XDSLWebServiceUsernameInt, domain.TelekomCredential.XDSLWebServicePassword);
-                var address = addressServiceClient.GetAddressFromCode(Convert.ToInt64(baseRequest.Data.bbk));
-                return new BaseResponse<ServiceAvailabilityResponse, SHA1>(passwordHash, baseRequest)
+                var address = addressServiceClient.GetAddressFromCode(Convert.ToInt64(request.Data.bbk));
+                return new NetspeedServiceServiceAvailabilityResponse(passwordHash, request)
                 {
-                    Culture = baseRequest.Culture,
-                    Username = baseRequest.Username,
-                    ResponseMessage = CommonResponse<ServiceAvailabilityResponse, SHA1>.SuccessResponse(baseRequest.Culture),
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
                     Data = new ServiceAvailabilityResponse()
                     {
                         address = address.InternalException == null ? address.Data.AddressText : "-",
@@ -167,16 +197,16 @@ public class NetspeedService : INetspeedService
                         AdslDistance = availabAdsl.InternalException == null ? availabAdsl.Data.Description.Distance : null,
                         VdslDistance = availabVdsl.InternalException == null ? availabVdsl.Data.Description.Distance : null,
                         FiberDistance = availabFiber.InternalException == null ? availabFiber.Data.Description.Distance : null,
-                        AdslPortState = availabAdsl.InternalException == null ? availabAdsl.Data.Description.PortState : AvailabilityServiceClient.PortState.NotAvailable,
-                        VdslPortState = availabVdsl.InternalException == null ? availabVdsl.Data.Description.PortState : AvailabilityServiceClient.PortState.NotAvailable,
-                        FiberPortState = availabFiber.InternalException == null ? availabFiber.Data.Description.PortState : AvailabilityServiceClient.PortState.NotAvailable,
+                        AdslPortState = availabAdsl.InternalException == null ? RadiusR.Localization.Lists.PortState.ResourceManager.GetString(availabAdsl.Data.Description.PortState.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)) : RadiusR.Localization.Lists.PortState.ResourceManager.GetString(AvailabilityServiceClient.PortState.NotAvailable.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)),
+                        VdslPortState = availabVdsl.InternalException == null ? RadiusR.Localization.Lists.PortState.ResourceManager.GetString(availabVdsl.Data.Description.PortState.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)) : RadiusR.Localization.Lists.PortState.ResourceManager.GetString(AvailabilityServiceClient.PortState.NotAvailable.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)),
+                        FiberPortState = availabFiber.InternalException == null ? RadiusR.Localization.Lists.PortState.ResourceManager.GetString(availabFiber.Data.Description.PortState.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)) : RadiusR.Localization.Lists.PortState.ResourceManager.GetString(AvailabilityServiceClient.PortState.NotAvailable.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)),
                         AdslSpeed = availabAdsl.InternalException == null ? availabAdsl.Data.Description.DSLMaxSpeed : null,
                         VdslSpeed = availabVdsl.InternalException == null ? availabVdsl.Data.Description.DSLMaxSpeed : null,
                         FiberSpeed = availabFiber.InternalException == null ? availabFiber.Data.Description.DSLMaxSpeed : null,
                         AdslSVUID = availabAdsl.InternalException == null ? availabAdsl.Data.Description.SVUID : "-",
                         VdslSVUID = availabVdsl.InternalException == null ? availabVdsl.Data.Description.SVUID : "-",
                         FiberSVUID = availabFiber.InternalException == null ? availabFiber.Data.Description.SVUID : "-",
-                        BBK = baseRequest.Data.bbk
+                        BBK = request.Data.bbk
                     }
                 };
             }
@@ -185,216 +215,323 @@ public class NetspeedService : INetspeedService
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error Service Availability");
-            return CommonResponse<ServiceAvailabilityResponse, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+            return new NetspeedServiceServiceAvailabilityResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                Data = null,
+                Username = request.Username
+            };
         }
     }
 
-    public BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetProvinceDistricts(BaseRequest<long, SHA1> baseRequest)
+    public NetspeedServiceArrayListResponse GetProvinceDistricts(NetspeedServiceArrayListRequest request)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
         try
         {
-            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            if (!request.HasValidHash(passwordHash, _duration))
             {
-                return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    Data = null,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
+                };
             }
-            var result = AddressClient.GetProvinceDistricts(baseRequest.Data);
-            return new BaseResponse<IEnumerable<ValueNamePair>, SHA1>(passwordHash, baseRequest)
+            var result = AddressClient.GetProvinceDistricts(request.Data);
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
             {
-                Culture = baseRequest.Culture,
+                Culture = request.Culture,
                 Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                 {
                     Code = p.Code,
                     Name = p.Name
                 }) : Enumerable.Empty<ValueNamePair>(),
-                ResponseMessage = CommonResponse<IEnumerable<ValueNamePair>, SHA1>.SuccessResponse(baseRequest.Culture),
-                Username = baseRequest.Username
+                ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                Username = request.Username
             };
         }
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error Get Province Dsitricts");
-            return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                Data = null,
+                ResponseMessage = CommonResponse.InternalException(request.Culture),
+                Username = request.Username
+            };
         }
     }
 
-    public BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetDistrictRuralRegions(BaseRequest<long, SHA1> baseRequest)
+    public NetspeedServiceArrayListResponse GetDistrictRuralRegions(NetspeedServiceArrayListRequest request)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
         try
         {
-            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            if (!request.HasValidHash(passwordHash, _duration))
             {
-                return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    Data = null,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
+                };
             }
-            var result = AddressClient.GetDistrictRuralRegions(baseRequest.Data);
-            return new BaseResponse<IEnumerable<ValueNamePair>, SHA1>(passwordHash, baseRequest)
+            var result = AddressClient.GetDistrictRuralRegions(request.Data);
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
             {
-                Culture = baseRequest.Culture,
+                Culture = request.Culture,
                 Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                 {
                     Code = p.Code,
                     Name = p.Name
                 }) : Enumerable.Empty<ValueNamePair>(),
-                ResponseMessage = CommonResponse<IEnumerable<ValueNamePair>, SHA1>.SuccessResponse(baseRequest.Culture),
-                Username = baseRequest.Username
+                ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                Username = request.Username
             };
         }
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error Get District Rural Regions");
-            return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                Data = null,
+                ResponseMessage = CommonResponse.InternalException(request.Culture),
+                Username = request.Username
+            };
         }
     }
 
-    public BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetRuralRegionNeighbourhoods(BaseRequest<long, SHA1> baseRequest)
+    public NetspeedServiceArrayListResponse GetRuralRegionNeighbourhoods(NetspeedServiceArrayListRequest request)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
         try
         {
-            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            if (!request.HasValidHash(passwordHash, _duration))
             {
-                return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    Data = null,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
+                };
             }
-            var result = AddressClient.GetRuralRegionNeighbourhoods(baseRequest.Data);
-            return new BaseResponse<IEnumerable<ValueNamePair>, SHA1>(passwordHash, baseRequest)
+            var result = AddressClient.GetRuralRegionNeighbourhoods(request.Data);
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
             {
-                Culture = baseRequest.Culture,
+                Culture = request.Culture,
                 Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                 {
                     Code = p.Code,
                     Name = p.Name
                 }) : Enumerable.Empty<ValueNamePair>(),
-                ResponseMessage = CommonResponse<IEnumerable<ValueNamePair>, SHA1>.SuccessResponse(baseRequest.Culture),
-                Username = baseRequest.Username
+                ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                Username = request.Username
             };
         }
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error Get Rural Region Neighbourhoods");
-            return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                Data = null,
+                ResponseMessage = CommonResponse.InternalException(request.Culture),
+                Username = request.Username
+            };
         }
     }
 
-    public BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetNeighbourhoodStreets(BaseRequest<long, SHA1> baseRequest)
+    public NetspeedServiceArrayListResponse GetNeighbourhoodStreets(NetspeedServiceArrayListRequest request)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
         try
         {
-            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            if (!request.HasValidHash(passwordHash, _duration))
             {
-                return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    Data = null,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
+                };
             }
-            var result = AddressClient.GetNeighbourhoodStreets(baseRequest.Data);
-            return new BaseResponse<IEnumerable<ValueNamePair>, SHA1>(passwordHash, baseRequest)
+            var result = AddressClient.GetNeighbourhoodStreets(request.Data);
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
             {
-                Culture = baseRequest.Culture,
+                Culture = request.Culture,
                 Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                 {
                     Code = p.Code,
                     Name = p.Name
                 }) : Enumerable.Empty<ValueNamePair>(),
-                ResponseMessage = CommonResponse<IEnumerable<ValueNamePair>, SHA1>.SuccessResponse(baseRequest.Culture),
-                Username = baseRequest.Username
+                ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                Username = request.Username
             };
         }
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error Get Neighbourhood Streets");
-            return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                Data = null,
+                ResponseMessage = CommonResponse.InternalException(request.Culture),
+                Username = request.Username
+            };
         }
     }
 
-    public BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetStreetBuildings(BaseRequest<long, SHA1> baseRequest)
+    public NetspeedServiceArrayListResponse GetStreetBuildings(NetspeedServiceArrayListRequest request)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
         try
         {
-            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            if (!request.HasValidHash(passwordHash, _duration))
             {
-                return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    Data = null,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
+                };
             }
-            var result = AddressClient.GetStreetBuildings(baseRequest.Data);
-            return new BaseResponse<IEnumerable<ValueNamePair>, SHA1>(passwordHash, baseRequest)
+            var result = AddressClient.GetStreetBuildings(request.Data);
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
             {
-                Culture = baseRequest.Culture,
+                Culture = request.Culture,
                 Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                 {
                     Code = p.Code,
                     Name = p.Name
                 }) : Enumerable.Empty<ValueNamePair>(),
-                ResponseMessage = CommonResponse<IEnumerable<ValueNamePair>, SHA1>.SuccessResponse(baseRequest.Culture),
-                Username = baseRequest.Username
+                ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                Username = request.Username
             };
         }
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error Get Street Buildings");
-            return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                Data = null,
+                ResponseMessage = CommonResponse.InternalException(request.Culture),
+                Username = request.Username
+            };
         }
     }
 
-    public BaseResponse<IEnumerable<ValueNamePair>, SHA1> GetBuildingApartments(BaseRequest<long, SHA1> baseRequest)
+    public NetspeedServiceArrayListResponse GetBuildingApartments(NetspeedServiceArrayListRequest request)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
         try
         {
-            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            if (!request.HasValidHash(passwordHash, _duration))
             {
-                return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    Data = null,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
+                };
             }
-            var result = AddressClient.GetBuildingApartments(baseRequest.Data);
-            return new BaseResponse<IEnumerable<ValueNamePair>, SHA1>(passwordHash, baseRequest)
+            var result = AddressClient.GetBuildingApartments(request.Data);
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
             {
-                Culture = baseRequest.Culture,
+                Culture = request.Culture,
                 Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                 {
                     Code = p.Code,
                     Name = p.Name
                 }) : Enumerable.Empty<ValueNamePair>(),
-                ResponseMessage = CommonResponse<IEnumerable<ValueNamePair>, SHA1>.SuccessResponse(baseRequest.Culture),
-                Username = baseRequest.Username
+                ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                Username = request.Username
             };
         }
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error Get Building Apartments");
-            return CommonResponse<IEnumerable<ValueNamePair>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+            return new NetspeedServiceArrayListResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                Data = null,
+                ResponseMessage = CommonResponse.InternalException(request.Culture),
+                Username = request.Username
+            };
         }
     }
-    public BaseResponse<RadiusR.Address.QueryInterface.AddressDetails, SHA1> GetApartmentAddress(BaseRequest<long, SHA1> baseRequest)
+    public NetspeedServiceAddressDetailsResponse GetApartmentAddress(NetspeedServiceAddressDetailsRequest request)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
         try
         {
-            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            if (!request.HasValidHash(passwordHash, _duration))
             {
-                return CommonResponse<RadiusR.Address.QueryInterface.AddressDetails, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return new NetspeedServiceAddressDetailsResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                    Data = null
+                };
             }
-            var result = AddressClient.GetApartmentAddress(baseRequest.Data);
-            return new BaseResponse<RadiusR.Address.QueryInterface.AddressDetails, SHA1>(passwordHash, baseRequest)
+            var result = AddressClient.GetApartmentAddress(request.Data);
+            return new NetspeedServiceAddressDetailsResponse(passwordHash, request)
             {
-                Culture = baseRequest.Culture,
-                Data = result.Data,
-                ResponseMessage = CommonResponse<RadiusR.Address.QueryInterface.AddressDetails, SHA1>.SuccessResponse(baseRequest.Culture),
-                Username = baseRequest.Username
+                Culture = request.Culture,
+                Data = new AddressDetailsResponse()
+                {
+                    AddressNo = result.Data.AddressNo,
+                    AddressText = result.Data.AddressText,
+                    ApartmentID = result.Data.ApartmentID,
+                    ApartmentNo = result.Data.ApartmentNo,
+                    DistrictID = result.Data.DistrictID,
+                    DistrictName = result.Data.DistrictName,
+                    DoorID = result.Data.DoorID,
+                    DoorNo = result.Data.DoorNo,
+                    NeighbourhoodID = result.Data.NeighbourhoodID,
+                    NeighbourhoodName = result.Data.NeighbourhoodName,
+                    ProvinceID = result.Data.ProvinceID,
+                    ProvinceName = result.Data.ProvinceName,
+                    RuralCode = result.Data.RuralCode,
+                    StreetID = result.Data.StreetID,
+                    StreetName = result.Data.StreetName
+                },
+                ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                Username = request.Username
             };
         }
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error Get Apartment Address");
-            return CommonResponse<RadiusR.Address.QueryInterface.AddressDetails, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+            return new NetspeedServiceAddressDetailsResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                Data = null,
+                ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
+                Username = request.Username
+            };
         }
     }
 
-    public BaseResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1> GetBills(BaseRequest<SubscriberGetBillsRequest, SHA1> baseRequest)
+    public NetspeedServiceSubscriberGetBillsResponse GetBills(NetspeedServiceSubscriberGetBillsRequest request)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
@@ -402,15 +539,21 @@ public class NetspeedService : INetspeedService
         {
             using (var db = new RadiusR.DB.RadiusREntities())
             {
-                if (baseRequest.HasValidHash(passwordHash, _duration))
+                if (request.HasValidHash(passwordHash, _duration))
                 {
-                    if (baseRequest.Data.PhoneNo.StartsWith("0"))
+                    if (request.Data.PhoneNo.StartsWith("0"))
                     {
-                        baseRequest.Data.PhoneNo = baseRequest.Data.PhoneNo.TrimStart('0');
+                        request.Data.PhoneNo = request.Data.PhoneNo.TrimStart('0');
                     }
-                    var dbClient = db.Subscriptions.Where(s => s.SubscriberNo == baseRequest.Data.SubscriberNo && s.Customer.ContactPhoneNo == baseRequest.Data.PhoneNo).FirstOrDefault();
+                    var dbClient = db.Subscriptions.Where(s => s.SubscriberNo == request.Data.SubscriberNo && s.Customer.ContactPhoneNo == request.Data.PhoneNo).FirstOrDefault();
                     if (dbClient == null)
-                        return CommonResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1>.SubscriberNotFoundErrorResponse(passwordHash, baseRequest);
+                        return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
+                        {
+                            Culture = request.Culture,
+                            Data = null,
+                            Username = request.Username,
+                            ResponseMessage = CommonResponse.SubscriberNotFoundErrorResponse(request.Culture),
+                        };
                     var firstUnpaidBill = dbClient.Bills.Where(bill => bill.BillStatusID == (short)RadiusR.DB.Enums.BillState.Unpaid).OrderBy(bill => bill.IssueDate).FirstOrDefault();
                     var result = dbClient.Bills.Where(bill => bill.BillStatusID == (short)RadiusR.DB.Enums.BillState.Unpaid).OrderBy(bill => bill.IssueDate).Select(bill =>
                      new SubscriberGetBillsResponse()
@@ -425,78 +568,114 @@ public class NetspeedService : INetspeedService
                          Total = bill.GetPayableCost().ToString("###,##0.00"),
                      }
                     );
-                    return new BaseResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1>(passwordHash, baseRequest)
+                    return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
                     {
-                        Culture = baseRequest.Culture,
+                        Culture = request.Culture,
                         Data = result.ToArray(),
-                        ResponseMessage = CommonResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1>.SuccessResponse(baseRequest.Culture)
+                        ResponseMessage = CommonResponse.SuccessResponse(request.Culture)
                     };
                 }
-                return CommonResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                    Username = request.Username,
+                    Data = null
+                };
             }
         }
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error Get Subscriber unpaid bill list");
-            return CommonResponse<IEnumerable<SubscriberGetBillsResponse>, SHA1>.InternalException(passwordHash, baseRequest);
+            return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                Data = null,
+                ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
+                Username = request.Username
+            };
         }
     }
 
-    public BaseResponse<SubscriberPayBillsResponse, SHA1> SubscriberPaymentVPOS(BaseRequest<SubscriberPayBillsRequest, SHA1> baseRequest)
+    public NetspeedServicePaymentVPOSResponse SubscriberPaymentVPOS(NetspeedServicePaymentVPOSRequest request)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
         try
         {
-            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            if (!request.HasValidHash(passwordHash, _duration))
             {
-                return CommonResponse<SubscriberPayBillsResponse, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                    Username = request.Username,
+                    Data = null
+                };
             }
             using (RadiusREntities db = new RadiusREntities())
             {
-                var dbSubscription = db.Subscriptions.Where(s => s.SubscriberNo == baseRequest.Data.SubscriberNo).FirstOrDefault();
+                var dbSubscription = db.Subscriptions.Where(s => s.SubscriberNo == request.Data.SubscriberNo).FirstOrDefault();
                 if (dbSubscription == null)
-                    return CommonResponse<SubscriberPayBillsResponse, SHA1>.SubscriberNotFoundErrorResponse(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+                    return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
+                    {
+                        Culture = request.Culture,
+                        ResponseMessage = CommonResponse.SubscriberNotFoundErrorResponse(request.Culture),
+                        Username = request.Username,
+                        Data = null,
+                    };
                 var VPOSModel = VPOSManager.GetVPOSModel(
-                    baseRequest.Data.OkUrl,
-                    baseRequest.Data.FailUrl,
-                    baseRequest.Data.PayableAmount,
+                    request.Data.OkUrl,
+                    request.Data.FailUrl,
+                    request.Data.PayableAmount,
                     dbSubscription.Customer.Culture.Split('-').FirstOrDefault(),
                     dbSubscription.SubscriberNo + "-" + dbSubscription.ValidDisplayName);
                 var htmlForm = VPOSModel.GetHtmlForm().ToHtmlString();
-                return new BaseResponse<SubscriberPayBillsResponse, SHA1>(passwordHash, baseRequest)
+                return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
                 {
-                    Data = new SubscriberPayBillsResponse()
+                    Data = new PaymentVPOSResponse()
                     {
                         HtmlForm = htmlForm,
                     },
-                    Culture = baseRequest.Culture,
-                    ResponseMessage = CommonResponse<SubscriberPayBillsResponse, SHA1>.SuccessResponse(baseRequest.Culture),
-                    Username = baseRequest.Username
+                    Culture = request.Culture,
+                    ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                    Username = request.Username
                 };
             }
         }
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error Get Subscriber payment VPOS");
-            return CommonResponse<SubscriberPayBillsResponse, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest, ex);
+            return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                Data = null,
+                ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
+                Username = request.Username
+            };
         }
     }
 
-    public BaseResponse<Dictionary<string, string>, SHA1> NewCustomerRegister(BaseRequest<NewCustomerRegisterRequest, SHA1> baseRequest)
+    public NetspeedServiceNewCustomerRegisterResponse NewCustomerRegister(NetspeedServiceNewCustomerRegisterRequest request)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
         try
         {
-            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            if (!request.HasValidHash(passwordHash, _duration))
             {
-                return CommonResponse<Dictionary<string, string>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
+                return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                    Username = request.Username,
+                    Data = null
+                };
             }
             using (var db = new RadiusR.DB.RadiusREntities())
             {
                 var registeredCustomer = new Customer();
-                var register = baseRequest.Data;
+                var register = request.Data;
                 CustomerRegistrationInfo registrationInfo = new CustomerRegistrationInfo()
                 {
                     CorporateInfo = register.CorporateCustomerInfo == null ? null : new CustomerRegistrationInfo.CorporateCustomerInfo()
@@ -526,8 +705,8 @@ public class NetspeedService : INetspeedService
                         ExecutiveFathersName = register.CorporateCustomerInfo.ExecutiveFathersName,
                         ExecutiveMothersMaidenName = register.CorporateCustomerInfo.ExecutiveMothersMaidenName,
                         ExecutiveMothersName = register.CorporateCustomerInfo.ExecutiveMothersName,
-                        ExecutiveNationality = register.CorporateCustomerInfo.ExecutiveNationality,
-                        ExecutiveProfession = register.CorporateCustomerInfo.ExecutiveProfession,
+                        ExecutiveNationality = (CountryCodes?)register.CorporateCustomerInfo.ExecutiveNationality,
+                        ExecutiveProfession = (Profession?)register.CorporateCustomerInfo.ExecutiveProfession,
                         ExecutiveResidencyAddress = register.CorporateCustomerInfo.ExecutiveResidencyAddress == null ? null : new CustomerRegistrationInfo.AddressInfo()
                         {
                             AddressNo = register.CorporateCustomerInfo.ExecutiveResidencyAddress.AddressNo,
@@ -548,7 +727,7 @@ public class NetspeedService : INetspeedService
                             StreetName = register.CorporateCustomerInfo.ExecutiveResidencyAddress.StreetName,
                             RuralCode = register.CorporateCustomerInfo.ExecutiveResidencyAddress.RuralCode,
                         },
-                        ExecutiveSex = register.CorporateCustomerInfo.ExecutiveSex,
+                        ExecutiveSex = (Sexes?)register.CorporateCustomerInfo.ExecutiveSex,
                         TaxNo = register.CorporateCustomerInfo.TaxNo,
                         TaxOffice = register.CorporateCustomerInfo.TaxOffice,
                         Title = register.CorporateCustomerInfo.Title,
@@ -578,7 +757,7 @@ public class NetspeedService : INetspeedService
                         },
                         ContactPhoneNo = register.CustomerGeneralInfo.ContactPhoneNo,
                         Culture = register.CustomerGeneralInfo.Culture,
-                        CustomerType = register.CustomerGeneralInfo.CustomerType,
+                        CustomerType = (CustomerType?)register.CustomerGeneralInfo.CustomerType,
                         Email = register.CustomerGeneralInfo.Email,
                         OtherPhoneNos = register.CustomerGeneralInfo.OtherPhoneNos == null ? null : register.CustomerGeneralInfo.OtherPhoneNos.Select(p => new CustomerRegistrationInfo.PhoneNoListItem()
                         {
@@ -588,7 +767,7 @@ public class NetspeedService : INetspeedService
                     IDCard = register.IDCardInfo == null ? null : new CustomerRegistrationInfo.IDCardInfo()
                     {
                         BirthDate = register.IDCardInfo.BirthDate,
-                        CardType = register.IDCardInfo.CardType,
+                        CardType = (IDCardTypes?)register.IDCardInfo.CardType,
                         DateOfIssue = register.IDCardInfo.DateOfIssue,
                         District = register.IDCardInfo.District,
                         FirstName = register.IDCardInfo.FirstName,
@@ -609,8 +788,8 @@ public class NetspeedService : INetspeedService
                         FathersName = register.IndividualCustomerInfo.FathersName,
                         MothersMaidenName = register.IndividualCustomerInfo.MothersMaidenName,
                         MothersName = register.IndividualCustomerInfo.MothersName,
-                        Nationality = register.IndividualCustomerInfo.Nationality,
-                        Profession = register.IndividualCustomerInfo.Profession,
+                        Nationality = (CountryCodes?)register.IndividualCustomerInfo.Nationality,
+                        Profession = (Profession?)register.IndividualCustomerInfo.Profession,
                         ResidencyAddress = register.IndividualCustomerInfo.ResidencyAddress == null ? null : new CustomerRegistrationInfo.AddressInfo()
                         {
                             AddressNo = register.IndividualCustomerInfo.ResidencyAddress.AddressNo,
@@ -631,7 +810,7 @@ public class NetspeedService : INetspeedService
                             StreetID = register.IndividualCustomerInfo.ResidencyAddress.StreetID,
                             StreetName = register.IndividualCustomerInfo.ResidencyAddress.StreetName
                         },
-                        Sex = register.IndividualCustomerInfo.Sex
+                        Sex = (Sexes?)register.IndividualCustomerInfo.Sex
                     },
                     SubscriptionInfo = register.SubscriptionInfo == null ? null : new CustomerRegistrationInfo.SubscriptionRegistrationInfo()
                     {
@@ -669,138 +848,160 @@ public class NetspeedService : INetspeedService
                     {
                         valuePairs.Add(item.Key, item.FirstOrDefault());
                     }
-                    return new BaseResponse<Dictionary<string, string>, SHA1>(passwordHash, baseRequest)
+                    return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                     {
                         Data = valuePairs,
-                        Culture = baseRequest.Culture,
-                        ResponseMessage = CommonResponse<Dictionary<string, string>, SHA1>.FailedResponse(baseRequest.Culture),
-                        Username = baseRequest.Username
+                        Culture = request.Culture,
+                        ResponseMessage = CommonResponse.FailedResponse(request.Culture),
+                        Username = request.Username
                     };
                 }
                 db.Customers.Add(registeredCustomer);
                 db.SaveChanges();
-                return new BaseResponse<Dictionary<string, string>, SHA1>(passwordHash, baseRequest)
+                return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                 {
                     Data = valuePairs,
-                    Culture = baseRequest.Culture,
-                    ResponseMessage = CommonResponse<Dictionary<string, string>, SHA1>.SuccessResponse(baseRequest.Culture),
-                    Username = baseRequest.Username
+                    Culture = request.Culture,
+                    ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                    Username = request.Username
                 };
             }
         }
         catch (NullReferenceException ex)
         {
             Errorslogger.Error(ex, "Error Null Reference Exception");
-            return CommonResponse<Dictionary<string, string>, SHA1>.NullObjectException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+            return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+            {
+                Data = null,
+                Username = request.Username,
+                Culture = request.Culture,
+                ResponseMessage = CommonResponse.NullObjectException(request.Culture)
+            };
         }
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error Get new customer register");
-            return CommonResponse<Dictionary<string, string>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
+            return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                Data = null,
+                Username = request.Username,
+                ResponseMessage = CommonResponse.InternalException(request.Culture)
+            };
         }
     }
 
-    public BaseResponse<Dictionary<string, string>, SHA1> ExistingCustomerRegister(BaseRequest<ExistingCustomerRegisterRequest, SHA1> baseRequest)
+    //public BaseResponse<Dictionary<string, string>, SHA1> ExistingCustomerRegister(request<ExistingCustomerRegisterRequest, SHA1> request)
+    //{
+    //    var password = _password;
+    //    var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+    //    try
+    //    {
+    //        if (!request.HasValidHash(passwordHash, _duration))
+    //        {
+    //            return CommonResponse<Dictionary<string, string>, SHA1>.UnauthorizedResponse(passwordHash, request);
+    //        }
+    //        using (var db = new RadiusR.DB.RadiusREntities())
+    //        {
+    //            var referenceCustomer = db.Subscriptions.Find(request.Data.SubscriberID);
+    //            if (referenceCustomer == null)
+    //                return CommonResponse<Dictionary<string, string>, SHA1>.SubscriberNotFoundErrorResponse(passwordHash, request);
+    //            var result = RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration.Registration.RegisterSubscriptionForExistingCustomer(db, new CustomerRegistrationInfo.SubscriptionRegistrationInfo(), referenceCustomer.Customer);
+    //            Dictionary<string, string> valuePairs = null;
+    //            if (result != null)
+    //            {
+    //                foreach (var item in result)
+    //                {
+    //                    valuePairs.Add(item.Key, item.FirstOrDefault());
+    //                }
+    //                return new BaseResponse<Dictionary<string, string>, SHA1>(passwordHash, request)
+    //                {
+    //                    Data = valuePairs,
+    //                    Culture = request.Culture,
+    //                    ResponseMessage = CommonResponse<Dictionary<string, string>, SHA1>.FailedResponse(request.Culture),
+    //                    Username = request.Username
+    //                };
+    //            }
+    //            return new BaseResponse<Dictionary<string, string>, SHA1>(passwordHash, request)
+    //            {
+    //                Data = valuePairs,
+    //                Culture = request.Culture,
+    //                ResponseMessage = CommonResponse<Dictionary<string, string>, SHA1>.SuccessResponse(request.Culture),
+    //                Username = request.Username
+    //            };
+    //        }
+    //    }
+    //    catch (NullReferenceException ex)
+    //    {
+    //        Errorslogger.Error(ex, "Error Null Reference Exception");
+    //        return CommonResponse<Dictionary<string, string>, SHA1>.NullObjectException(HashUtilities.CalculateHash<SHA1>(password), request);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Errorslogger.Error(ex, "Error Get new customer register");
+    //        return CommonResponse<Dictionary<string, string>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), request);
+    //    }
+    //}
+
+    public NetspeedServicePayBillsResponse PayBills(NetspeedServicePayBillsRequest request)
     {
         var password = _password;
         var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
         try
         {
-            if (!baseRequest.HasValidHash(passwordHash, _duration))
+            if (!request.HasValidHash(passwordHash, _duration))
             {
-                return CommonResponse<Dictionary<string, string>, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
-            }
-            using (var db = new RadiusR.DB.RadiusREntities())
-            {
-                var referenceCustomer = db.Subscriptions.Find(baseRequest.Data.SubscriberID);
-                if (referenceCustomer == null)
-                    return CommonResponse<Dictionary<string, string>, SHA1>.SubscriberNotFoundErrorResponse(passwordHash, baseRequest);
-                var result = RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration.Registration.RegisterSubscriptionForExistingCustomer(db, new CustomerRegistrationInfo.SubscriptionRegistrationInfo(), referenceCustomer.Customer);
-                Dictionary<string, string> valuePairs = null;
-                if (result != null)
+                return new NetspeedServicePayBillsResponse(passwordHash, request)
                 {
-                    foreach (var item in result)
-                    {
-                        valuePairs.Add(item.Key, item.FirstOrDefault());
-                    }
-                    return new BaseResponse<Dictionary<string, string>, SHA1>(passwordHash, baseRequest)
-                    {
-                        Data = valuePairs,
-                        Culture = baseRequest.Culture,
-                        ResponseMessage = CommonResponse<Dictionary<string, string>, SHA1>.FailedResponse(baseRequest.Culture),
-                        Username = baseRequest.Username
-                    };
-                }
-                return new BaseResponse<Dictionary<string, string>, SHA1>(passwordHash, baseRequest)
-                {
-                    Data = valuePairs,
-                    Culture = baseRequest.Culture,
-                    ResponseMessage = CommonResponse<Dictionary<string, string>, SHA1>.SuccessResponse(baseRequest.Culture),
-                    Username = baseRequest.Username
+                    Culture = request.Culture,
+                    ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                    Username = request.Username,
+                    Data = null,
                 };
-            }
-        }
-        catch (NullReferenceException ex)
-        {
-            Errorslogger.Error(ex, "Error Null Reference Exception");
-            return CommonResponse<Dictionary<string, string>, SHA1>.NullObjectException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
-        }
-        catch (Exception ex)
-        {
-            Errorslogger.Error(ex, "Error Get new customer register");
-            return CommonResponse<Dictionary<string, string>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
-        }
-    }
-
-    public BaseResponse<PayBillsResponse, SHA1> PayBills(BaseRequest<PayBillsRequest, SHA1> baseRequest)
-    {
-        var password = _password;
-        var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
-        try
-        {
-            if (!baseRequest.HasValidHash(passwordHash, _duration))
-            {
-                return CommonResponse<PayBillsResponse, SHA1>.UnauthorizedResponse(passwordHash, baseRequest);
             }
             using (RadiusREntities db = new RadiusREntities())
             {
-                if (baseRequest.Data.BillIds == null)
-                    return CommonResponse<PayBillsResponse, SHA1>.BillsNotFoundException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
-                if (baseRequest.Data.BillIds.Count() == 0)
-                    return CommonResponse<PayBillsResponse, SHA1>.BillsNotFoundException(HashUtilities.CalculateHash<SHA1>(password), baseRequest);
-
-                //var PayableBills = db.Bills.OrderBy(bill => bill.IssueDate).Take(baseRequest.Data.BillIds.Count()).Select(bill => bill.ID).ToArray();
-                //var IsPayable = true;
-                //foreach (var bill in PayableBills)
-                //{
-                //    if (!baseRequest.Data.BillIds.Contains(bill))
-                //    {
-                //        IsPayable = false;
-                //    }
-                //}
-                //if (IsPayable )
-                //{
-
-                //}
-                var Bills = db.Bills.Where(bill => baseRequest.Data.BillIds.Contains(bill.ID)).ToArray();
+                if (request.Data.BillIds == null)
+                    return new NetspeedServicePayBillsResponse(passwordHash, request)
+                    {
+                        Culture = request.Culture,
+                        Data = null,
+                        Username = request.Username,
+                        ResponseMessage = CommonResponse.BillsNotFoundException(request.Culture)
+                    };
+                if (request.Data.BillIds.Count() == 0)
+                    return new NetspeedServicePayBillsResponse(passwordHash, request)
+                    {
+                        Culture = request.Culture,
+                        Data = null,
+                        Username = request.Username,
+                        ResponseMessage = CommonResponse.BillsNotFoundException(request.Culture)
+                    };
+                var Bills = db.Bills.Where(bill => request.Data.BillIds.Contains(bill.ID)).ToArray();
                 var payResponse = RadiusR.DB.Utilities.Billing.BillPayment.PayBills(db, Bills, PaymentType.VirtualPos, BillPayment.AccountantType.Seller);
                 db.SaveChanges();
-                return new BaseResponse<PayBillsResponse, SHA1>(passwordHash, baseRequest)
+                return new NetspeedServicePayBillsResponse(passwordHash, request)
                 {
                     Data = new PayBillsResponse()
                     {
-                        PaymentResponse = payResponse
+                        PaymentResponse = payResponse.ToString()
                     },
-                    Culture = baseRequest.Culture,
-                    ResponseMessage = CommonResponse<PayBillsResponse, SHA1>.SuccessResponse(baseRequest.Culture),
-                    Username = baseRequest.Username
+                    Culture = request.Culture,
+                    ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                    Username = request.Username
                 };
             }
         }
         catch (Exception ex)
         {
             Errorslogger.Error(ex, "Error pay bills");
-            return CommonResponse<PayBillsResponse, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), baseRequest, ex);
+            return new NetspeedServicePayBillsResponse(passwordHash, request)
+            {
+                Culture = request.Culture,
+                Data = null,
+                ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
+                Username = request.Username
+            };
         }
     }
 }

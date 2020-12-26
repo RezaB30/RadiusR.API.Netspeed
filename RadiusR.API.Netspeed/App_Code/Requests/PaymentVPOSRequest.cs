@@ -8,7 +8,7 @@ using System.Web;
 /// Summary description for SubscriberPayBillsRequest
 /// </summary>
 [DataContract]
-public class SubscriberPayBillsRequest
+public class PaymentVPOSRequest
 {
     [DataMember]
     public decimal PayableAmount { get; set; }

@@ -9,7 +9,7 @@ using System.Web.Mvc;
 /// Summary description for SubscriberPayBillsResponse
 /// </summary>
 [DataContract]
-public class SubscriberPayBillsResponse
+public class PaymentVPOSResponse
 {
     [DataMember]
     public string HtmlForm { get; set; }
