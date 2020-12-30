@@ -141,4 +141,7 @@
   <data name="Success" xml:space="preserve">
     <value>Success</value>
   </data>
+  <data name="WrongOrInvalidBill" xml:space="preserve">
+    <value>have wrong or invalid Bills</value>
+  </data>
 </root>

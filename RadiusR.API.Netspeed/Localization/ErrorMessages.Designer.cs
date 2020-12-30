@@ -131,5 +131,14 @@ namespace RadiusR.API.Netspeed.Localization {
                 return ResourceManager.GetString("Success", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to have wrong or invalid Bills.
+        /// </summary>
+        public static string WrongOrInvalidBill {
+            get {
+                return ResourceManager.GetString("WrongOrInvalidBill", resourceCulture);
+            }
+        }
     }
 }

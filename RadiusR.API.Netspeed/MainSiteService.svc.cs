@@ -766,12 +766,12 @@ namespace RadiusR.API.Netspeed
                 using (RadiusREntities db = new RadiusREntities())
                 {
                     var dbSubscriptionBills = db.Bills.Where(bill => request.Data.BillIds.Contains(bill.ID) && bill.BillStatusID == (short)BillState.Unpaid).ToArray();
-                    if (dbSubscriptionBills == null || dbSubscriptionBills.Count() == 0)
+                    if (dbSubscriptionBills == null || dbSubscriptionBills.Count() != request.Data.BillIds.Count())
                     {
                         return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
                         {
                             Culture = request.Culture,
-                            ResponseMessage = CommonResponse.SubscriberNotFoundErrorResponse(request.Culture),
+                            ResponseMessage = CommonResponse.WrongOrInvalidBills(request.Culture),
                             Username = request.Username,
                             Data = null,
                         };
@@ -796,7 +796,6 @@ namespace RadiusR.API.Netspeed
                         dbSubscription.Customer.Culture.Split('-').FirstOrDefault(),
                         dbSubscription.SubscriberNo + "-" + dbSubscription.ValidDisplayName);
                     var htmlForm = VPOSModel.GetHtmlForm().ToHtmlString();
-                    PaidLogger.Info(VPOSModel);
                     return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
                     {
                         Data = new PaymentVPOSResponse()
@@ -1157,8 +1156,19 @@ namespace RadiusR.API.Netspeed
                         };
                     }
                     //
+                    if (Bills.Count() != request.Data.Count())
+                    {
+                        return new NetspeedServicePayBillsResponse(passwordHash, request)
+                        {
+                            Culture = request.Culture,
+                            ResponseMessage = CommonResponse.WrongOrInvalidBills(request.Culture),
+                            Username = request.Username,
+                            Data = null,
+                        };
+                    }
                     var payResponse = RadiusR.DB.Utilities.Billing.BillPayment.PayBills(db, Bills, PaymentType.VirtualPos, BillPayment.AccountantType.Seller);
                     db.SaveChanges();
+                    PaidLogger.Info($"Paid Successful. Bills : {string.Join("-", Bills.Select(b => b.ID.ToString()))}");
                     return new NetspeedServicePayBillsResponse(passwordHash, request)
                     {
                         Data = new PayBillsResponse()
