@@ -1,7 +1,9 @@
-﻿using System;
+﻿using RezaB.API.WebService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Web;
 
 /// <summary>
@@ -19,5 +21,21 @@ namespace RadiusR.API.Netspeed.Requests
         public string OkUrl { get; set; }
         [DataMember]
         public string FailUrl { get; set; }
+    }
+    [DataContract]
+    public partial class NetspeedServicePaymentVPOSRequest : BaseRequest<PaymentVPOSRequest, SHA1>
+    {
+        [DataMember]
+        public PaymentVPOSRequest PaymentVPOSParameters
+        {
+            get
+            {
+                return Data;
+            }
+            set
+            {
+                Data = value;
+            }
+        }
     }
 }

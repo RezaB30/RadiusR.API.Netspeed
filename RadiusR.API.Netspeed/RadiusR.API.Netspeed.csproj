@@ -175,6 +175,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommonResponse.cs" />
+    <Compile Include="Requests\AddressDetailsRequest.cs" />
+    <Compile Include="Requests\VPOSLoggerRequest.cs" />
+    <Compile Include="Responses\VPOSLoggerResponse.cs" />
     <Compile Include="ServiceSettings.cs" />
     <Compile Include="Enums\ErrorCodes.cs" />
     <Compile Include="Localization\Common.Designer.cs">

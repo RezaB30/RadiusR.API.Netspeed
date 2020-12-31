@@ -1,7 +1,9 @@
-﻿using System;
+﻿using RezaB.API.WebService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Web;
 
 /// <summary>
@@ -16,6 +18,17 @@ namespace RadiusR.API.Netspeed.Requests
     {
         [DataMember]
         public string bbk { get; set; }
+    }
+    [DataContract]
+    public partial class NetspeedServiceServiceAvailabilityRequest : BaseRequest<ServiceAvailabilityRequest, SHA1>
+    {
+        [DataMember]
+        public ServiceAvailabilityRequest ServiceAvailabilityParameters
+        {
+            get { return Data; }
+            set { Data = value; }
+        }
+
     }
 }
 

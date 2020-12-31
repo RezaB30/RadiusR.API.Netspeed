@@ -1,9 +1,11 @@
 ﻿using RadiusR.DB.Enums;
+using RezaB.API.WebService;
 using RezaB.TurkTelekom.WebServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Web;
 
 /// <summary>
@@ -186,5 +188,16 @@ namespace RadiusR.API.Netspeed.Requests
         public AddressInfo SetupAddress { get; set; }
         [DataMember]
         public int? BillingPeriod { get; set; }
+    }
+    [DataContract]
+    public partial class NetspeedServiceNewCustomerRegisterRequest : BaseRequest<NewCustomerRegisterRequest, SHA1>
+    {
+        [DataMember]
+        public NewCustomerRegisterRequest CustomerRegisterParameters
+        {
+            get { return Data; }
+            set { Data = value; }
+        }
+
     }
 }

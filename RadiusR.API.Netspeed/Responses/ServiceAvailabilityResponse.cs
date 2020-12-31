@@ -1,7 +1,9 @@
-﻿using System;
+﻿using RezaB.API.WebService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Web;
 
 /// <summary>
@@ -47,5 +49,22 @@ namespace RadiusR.API.Netspeed.Responses
         public string FiberSVUID { get; set; }
         [DataMember]
         public string BBK { get; set; }
+    }
+    [DataContract]
+    public partial class NetspeedServiceServiceAvailabilityResponse : BaseResponse<ServiceAvailabilityResponse, SHA1>
+    {
+        public NetspeedServiceServiceAvailabilityResponse(string passwordHash, BaseRequest<SHA1> baseRequest) : base(passwordHash, baseRequest) { }
+        [DataMember]
+        public ServiceAvailabilityResponse ServiceAvailabilityResponse
+        {
+            get
+            {
+                return Data;
+            }
+            set
+            {
+                Data = value;
+            }
+        }
     }
 }

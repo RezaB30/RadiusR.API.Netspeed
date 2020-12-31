@@ -42,5 +42,9 @@ namespace RadiusR.API.Netspeed
         NetspeedServicePayBillsResponse PayBills(NetspeedServicePayBillsRequest request);
         [OperationContract]
         NetspeedServiceNewCustomerRegisterResponse NewCustomerRegister(NetspeedServiceNewCustomerRegisterRequest request);
+        //[OperationContract]
+        //NetspeedServiceVPOSLoggerResponse VPOSSuccessLogger(NetspeedServiceVPOSLoggerRequest request);
+        //[OperationContract]
+        //NetspeedServiceVPOSLoggerResponse VPOSFailLogger(NetspeedServiceVPOSLoggerRequest request);
     }
 }

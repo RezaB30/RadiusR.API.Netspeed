@@ -1,7 +1,9 @@
-﻿using System;
+﻿using RezaB.API.WebService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Web;
 using System.Web.Mvc;
 
@@ -15,27 +17,16 @@ namespace RadiusR.API.Netspeed.Responses
     {
         [DataMember]
         public string HtmlForm { get; set; }
-        //[DataMember]
-        //public string OkUrl { get; set; }
-        //[DataMember]
-        //public string FailUrl { get; set; }
-        //[DataMember]
-        //public decimal PurchaseAmount { get; set; }
-        //[DataMember]
-        //public string Storekey { get; set; }
-        //[DataMember]
-        //public string MerchantId { get; set; }
-        //[DataMember]
-        //public int CurrencyCode { get; set; }
-        //[DataMember]
-        //public string Language { get; set; }
-        //[DataMember]
-        //public int? InstallmentCount { get; set; }
-        //[DataMember]
-        //public string OrderId { get; set; }
-        //[DataMember]
-        //public string BillingCustomerName { get; set; }
-        //[DataMember]
-        //public string ActionLink { get; set; }
+    }
+    [DataContract]
+    public partial class NetspeedServicePaymentVPOSResponse : BaseResponse<PaymentVPOSResponse, SHA1>
+    {
+        public NetspeedServicePaymentVPOSResponse(string passwordHash, BaseRequest<SHA1> baseRequest) : base(passwordHash, baseRequest) { }
+        [DataMember]
+        public PaymentVPOSResponse PaymentVPOSResponse
+        {
+            get { return Data; }
+            set { Data = value; }
+        }
     }
 }
