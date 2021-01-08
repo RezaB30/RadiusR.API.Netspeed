@@ -1168,6 +1168,15 @@ namespace RadiusR.API.Netspeed.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Yeni kayıt başvurunuz için şifreniz {0}.
+        /// </summary>
+        public static string RegisterSMS {
+            get {
+                return ResourceManager.GetString("RegisterSMS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remaining.
         /// </summary>
         public static string RemainingCount {

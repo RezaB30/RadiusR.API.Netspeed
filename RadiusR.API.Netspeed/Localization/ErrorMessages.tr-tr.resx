@@ -144,4 +144,7 @@
   <data name="WrongOrInvalidBill" xml:space="preserve">
     <value>Yanlış yada geçersiz faturalar bulunmakta</value>
   </data>
+  <data name="WrongSMSPassword" xml:space="preserve">
+    <value>SMS şifresi yanlış</value>
+  </data>
 </root>

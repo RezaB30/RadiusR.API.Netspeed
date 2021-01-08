@@ -59,12 +59,12 @@ namespace RadiusR.API.Netspeed
                 ErrorMessage = new RezaB.Data.Localization.LocalizedList<ErrorCodes, ErrorMessages>().GetDisplayText((int)ErrorCodes.Success, CreateCulture(culture))
             };
         }
-        public static ServiceResponse FailedResponse(string culture)
+        public static ServiceResponse FailedResponse(string culture, string errorMessage = null)
         {
             return new ServiceResponse()
             {
                 ErrorCode = (int)ErrorCodes.Failed,
-                ErrorMessage = new RezaB.Data.Localization.LocalizedList<ErrorCodes, ErrorMessages>().GetDisplayText((int)ErrorCodes.Failed, CreateCulture(culture))
+                ErrorMessage = errorMessage ?? new RezaB.Data.Localization.LocalizedList<ErrorCodes, ErrorMessages>().GetDisplayText((int)ErrorCodes.Failed, CreateCulture(culture))
             };
         }
         public static ServiceResponse HasMoreSubscription(string culture)

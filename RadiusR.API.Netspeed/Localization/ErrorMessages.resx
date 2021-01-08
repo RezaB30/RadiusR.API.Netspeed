@@ -144,4 +144,7 @@
   <data name="WrongOrInvalidBill" xml:space="preserve">
     <value>have wrong or invalid Bills</value>
   </data>
+  <data name="WrongSMSPassword" xml:space="preserve">
+    <value>SMS password is wrong</value>
+  </data>
 </root>

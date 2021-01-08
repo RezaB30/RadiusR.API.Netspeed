@@ -5,6 +5,7 @@ using RadiusR.DB;
 using RadiusR.DB.Enums;
 using RadiusR.DB.Utilities.Billing;
 using RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration;
+using RadiusR.SMS;
 using RadiusR.VPOS;
 using RezaB.API.WebService;
 using RezaB.TurkTelekom.WebServices.Address;
@@ -29,6 +30,7 @@ namespace RadiusR.API.Netspeed
         readonly RadiusR.Address.AddressManager AddressClient = new RadiusR.Address.AddressManager();
         Logger Errorslogger = LogManager.GetLogger("Errors");
         Logger PaidLogger = LogManager.GetLogger("Paid");
+        Logger SMSLogger = LogManager.GetLogger("SMSInternal");
         public NetspeedServiceArrayListResponse GetProvinces(NetspeedServiceRequests request)
         {
             var password = ServiceSettings.Password(request.Username);
@@ -1021,7 +1023,10 @@ namespace RadiusR.API.Netspeed
                             Username = request.Username
                         };
                     }
-                    db.Customers.Add(registeredCustomer);
+                    if (registeredCustomer != null)
+                    {
+                        db.Customers.Add(registeredCustomer);
+                    }
                     db.SaveChanges();
                     return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                     {
@@ -1188,6 +1193,119 @@ namespace RadiusR.API.Netspeed
                 {
                     Culture = request.Culture,
                     Data = null,
+                    ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
+                    Username = request.Username
+                };
+            }
+        }
+
+        readonly Random random = new Random();
+        public NetspeedServiceSendGenericSMSResponse SendGenericSMS(NetspeedServiceSendGenericSMSRequest request)
+        {
+            var password = ServiceSettings.Password(request.Username);
+            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            try
+            {
+                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                {
+                    return new NetspeedServiceSendGenericSMSResponse(passwordHash, request)
+                    {
+                        Culture = request.Culture,
+                        Data = false,
+                        ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                        Username = request.Username,
+                    };
+                }
+                if (string.IsNullOrEmpty(request.Data.CustomerPhoneNo))
+                {
+                    return new NetspeedServiceSendGenericSMSResponse(passwordHash, request)
+                    {
+                        Culture = request.Culture,
+                        Data = false,
+                        ResponseMessage = CommonResponse.NullObjectException(request.Culture),
+                        Username = request.Username,
+                    };
+                }
+                var randomPassword = random.Next(100000, 999999);
+                CacheManager.Set(randomPassword.ToString(), request.Data.CustomerPhoneNo, Properties.Settings.Default.PasswordDuration);
+                SMSService SMS = new SMSService();
+                SMS.SendGenericSMS(request.Data.CustomerPhoneNo, request.Culture, rawText: string.Format(Localization.Common.RegisterSMS, randomPassword, Properties.Settings.Default.PasswordDuration));
+                SMSLogger.Error($"Sent sms to {request.Data.CustomerPhoneNo} . password is {randomPassword}");
+                return new NetspeedServiceSendGenericSMSResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                    Data = true,
+                };
+            }
+            catch (Exception ex)
+            {
+                Errorslogger.Error(ex, "Error send generic sms");
+                return new NetspeedServiceSendGenericSMSResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Data = false,
+                    ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
+                    Username = request.Username
+                };
+            }
+        }
+        public NetspeedServiceRegisterSMSValidationResponse RegisterSMSValidation(NetspeedServiceRegisterSMSValidationRequest request)
+        {
+            var password = ServiceSettings.Password(request.Username);
+            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            try
+            {
+                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                {
+                    return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
+                    {
+                        Culture = request.Culture,
+                        Data = false,
+                        ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                        Username = request.Username,
+                    };
+                }
+                if (string.IsNullOrEmpty(request.Data.CustomerPhoneNo) || string.IsNullOrEmpty(request.Data.Password))
+                {
+                    Errorslogger.Error($"Null object error. Phone No : {request.Data.CustomerPhoneNo} - Password : {request.Data.Password}");
+                    return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
+                    {
+                        Culture = request.Culture,
+                        Data = false,
+                        ResponseMessage = CommonResponse.NullObjectException(request.Culture),
+                        Username = request.Username,
+                    };
+                }
+                var getCacheValue = CacheManager.Get(request.Data.CustomerPhoneNo);
+                if (string.IsNullOrEmpty(getCacheValue))
+                {
+                    SMSLogger.Error($"SMS validation is failed. key : {request.Data.CustomerPhoneNo} - value : {request.Data.Password} ");
+                    return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
+                    {
+                        Culture = request.Culture,
+                        Data = false,
+                        ResponseMessage = CommonResponse.FailedResponse(request.Culture, Localization.ErrorMessages.ResourceManager.GetString("WrongSMSPassword", CultureInfo.CreateSpecificCulture(request.Culture))),
+                        Username = request.Username,
+                    };
+                }
+                return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Data = true,
+                    ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                    Username = request.Username,
+                };
+
+            }
+            catch (Exception ex)
+            {
+                Errorslogger.Error(ex, "Error sms validation");
+                return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Data = false,
                     ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
                     Username = request.Username
                 };

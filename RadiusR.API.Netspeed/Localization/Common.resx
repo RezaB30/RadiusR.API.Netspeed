@@ -486,6 +486,9 @@
   <data name="ReferenceNo" xml:space="preserve">
     <value>Reference No</value>
   </data>
+  <data name="RegisterSMS" xml:space="preserve">
+    <value>Yeni kayıt başvurunuz için şifreniz {0}</value>
+  </data>
   <data name="RemainingCount" xml:space="preserve">
     <value>Remaining</value>
   </data>

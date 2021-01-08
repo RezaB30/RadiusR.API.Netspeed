@@ -140,5 +140,14 @@ namespace RadiusR.API.Netspeed.Localization {
                 return ResourceManager.GetString("WrongOrInvalidBill", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SMS password is wrong.
+        /// </summary>
+        public static string WrongSMSPassword {
+            get {
+                return ResourceManager.GetString("WrongSMSPassword", resourceCulture);
+            }
+        }
     }
 }
