@@ -43,6 +43,4 @@ namespace RadiusR.API.Netspeed.Requests
             }
         }
     }
-    
-    
 }

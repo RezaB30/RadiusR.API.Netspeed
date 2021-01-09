@@ -50,5 +50,13 @@ namespace RadiusR.API.Netspeed
         NetspeedServiceSendGenericSMSResponse SendGenericSMS(NetspeedServiceSendGenericSMSRequest request);
         [OperationContract]
         NetspeedServiceRegisterSMSValidationResponse RegisterSMSValidation(NetspeedServiceRegisterSMSValidationRequest request);
+        [OperationContract]
+        NetspeedServiceArrayListResponse GetNationalities(NetspeedServiceRequests request);
+        [OperationContract]
+        NetspeedServiceArrayListResponse GetSexes(NetspeedServiceRequests request);
+        [OperationContract]
+        NetspeedServiceArrayListResponse GetProfessions(NetspeedServiceRequests request);
+        [OperationContract]
+        NetspeedServiceArrayListResponse GetIDCardTypes(NetspeedServiceRequests request);
     }
 }

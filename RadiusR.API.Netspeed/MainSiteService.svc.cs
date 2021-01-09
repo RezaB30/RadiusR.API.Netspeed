@@ -8,6 +8,7 @@ using RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration;
 using RadiusR.SMS;
 using RadiusR.VPOS;
 using RezaB.API.WebService;
+using RezaB.Data.Localization;
 using RezaB.TurkTelekom.WebServices.Address;
 using RezaB.TurkTelekom.WebServices.Availability;
 using System;
@@ -1336,5 +1337,173 @@ namespace RadiusR.API.Netspeed
             return Math.Max(0m, billsAmount - creditsAmount);
         }
         #endregion
+        public NetspeedServiceArrayListResponse GetNationalities(NetspeedServiceRequests request)
+        {
+            var password = ServiceSettings.Password(request.Username);
+            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            try
+            {
+                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                {
+                    return new NetspeedServiceArrayListResponse(passwordHash, request)
+                    {
+                        Culture = request.Culture,
+                        Data = null,
+                        ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                        Username = request.Username,
+                    };
+                }
+                var list = new LocalizedList<CountryCodes, RadiusR.Localization.Lists.CountryCodes>().GetList(CultureInfo.CreateSpecificCulture(request.Culture));
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                    Data = list.Select(l => new ValueNamePair()
+                    {
+                        Code = l.Key,
+                        Name = l.Value
+                    }).ToArray(),
+                };
+            }
+            catch (Exception ex)
+            {
+                Errorslogger.Error(ex, "'exception'");
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Data = null,
+                    ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
+                    Username = request.Username
+                };
+            }
+        }
+
+        public NetspeedServiceArrayListResponse GetSexes(NetspeedServiceRequests request)
+        {
+            var password = ServiceSettings.Password(request.Username);
+            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            try
+            {
+                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                {
+                    return new NetspeedServiceArrayListResponse(passwordHash, request)
+                    {
+                        Culture = request.Culture,
+                        Data = null,
+                        ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                        Username = request.Username,
+                    };
+                }
+                var list = new LocalizedList<Sexes, RadiusR.Localization.Lists.Sexes>().GetList(CultureInfo.CreateSpecificCulture(request.Culture));
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                    Data = list.Select(l => new ValueNamePair()
+                    {
+                        Code = l.Key,
+                        Name = l.Value
+                    }).ToArray(),
+                };
+            }
+            catch (Exception ex)
+            {
+                Errorslogger.Error(ex, "'exception'");
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Data = null,
+                    ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
+                    Username = request.Username
+                };
+            }
+        }
+
+        public NetspeedServiceArrayListResponse GetProfessions(NetspeedServiceRequests request)
+        {
+            var password = ServiceSettings.Password(request.Username);
+            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            try
+            {
+                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                {
+                    return new NetspeedServiceArrayListResponse(passwordHash, request)
+                    {
+                        Culture = request.Culture,
+                        Data = null,
+                        ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                        Username = request.Username,
+                    };
+                }
+                var list = new LocalizedList<Profession, RadiusR.Localization.Lists.Profession>().GetList(CultureInfo.CreateSpecificCulture(request.Culture));
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                    Data = list.Select(l => new ValueNamePair()
+                    {
+                        Code = l.Key,
+                        Name = l.Value
+                    }).ToArray(),
+                };
+            }
+            catch (Exception ex)
+            {
+                Errorslogger.Error(ex, "'exception'");
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Data = null,
+                    ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
+                    Username = request.Username
+                };
+            }
+        }
+
+        public NetspeedServiceArrayListResponse GetIDCardTypes(NetspeedServiceRequests request)
+        {
+            var password = ServiceSettings.Password(request.Username);
+            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            try
+            {
+                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                {
+                    return new NetspeedServiceArrayListResponse(passwordHash, request)
+                    {
+                        Culture = request.Culture,
+                        Data = null,
+                        ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                        Username = request.Username,
+                    };
+                }
+                var list = new LocalizedList<IDCardTypes, RadiusR.Localization.Lists.IDCardTypes>().GetList(CultureInfo.CreateSpecificCulture(request.Culture));
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Username = request.Username,
+                    ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                    Data = list.Select(l => new ValueNamePair()
+                    {
+                        Code = l.Key,
+                        Name = l.Value
+                    }).ToArray(),
+                };
+            }
+            catch (Exception ex)
+            {
+                Errorslogger.Error(ex, "'exception'");
+                return new NetspeedServiceArrayListResponse(passwordHash, request)
+                {
+                    Culture = request.Culture,
+                    Data = null,
+                    ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
+                    Username = request.Username
+                };
+            }
+        }
+
     }
 }
