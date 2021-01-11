@@ -21,6 +21,7 @@ using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
 using System.Threading;
+using RezaB.API.WebService.NLogExtentions;
 
 namespace RadiusR.API.Netspeed
 {
@@ -29,13 +30,15 @@ namespace RadiusR.API.Netspeed
     public class MainSiteService : IMainSiteService
     {
         readonly RadiusR.Address.AddressManager AddressClient = new RadiusR.Address.AddressManager();
-        Logger Errorslogger = LogManager.GetLogger("Errors");
-        Logger PaidLogger = LogManager.GetLogger("Paid");
-        Logger SMSLogger = LogManager.GetLogger("SMSInternal");
+        //Logger Errorslogger = LogManager.GetLogger("Errors");
+        //Logger PaidLogger = LogManager.GetLogger("Paid");
+        WebServiceLogger SMSLogger = new WebServiceLogger("SMSInternal");
+        WebServiceLogger Errorslogger = new WebServiceLogger("Errors");
+        WebServiceLogger PaidLogger = new WebServiceLogger("Paid");
         public NetspeedServiceArrayListResponse GetProvinces(NetspeedServiceRequests request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -63,7 +66,8 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error Get Provinces");
+                Errorslogger.LogException(request.Username, ex);
+                //Errorslogger.Error(ex, "Error Get Provinces");
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -77,7 +81,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceRegisterCustomerContactResponse RegisterCustomerContact(NetspeedServiceCustomerContactRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 using (var db = new RadiusR.DB.RadiusREntities())
@@ -137,7 +141,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error Register Customer Contact");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceRegisterCustomerContactResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -151,7 +155,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceServiceAvailabilityResponse ServiceAvailability(NetspeedServiceServiceAvailabilityRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -226,7 +230,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error Service Availability");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceServiceAvailabilityResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -240,7 +244,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceArrayListResponse GetProvinceDistricts(NetspeedServiceArrayListRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -278,7 +282,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error Get Province Dsitricts");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -292,7 +296,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceArrayListResponse GetDistrictRuralRegions(NetspeedServiceArrayListRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -330,7 +334,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error Get District Rural Regions");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -344,7 +348,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceArrayListResponse GetRuralRegionNeighbourhoods(NetspeedServiceArrayListRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -382,7 +386,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error Get Rural Region Neighbourhoods");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -396,7 +400,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceArrayListResponse GetNeighbourhoodStreets(NetspeedServiceArrayListRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -434,7 +438,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error Get Neighbourhood Streets");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -448,7 +452,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceArrayListResponse GetStreetBuildings(NetspeedServiceArrayListRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -486,7 +490,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error Get Street Buildings");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -499,7 +503,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceArrayListResponse GetBuildingApartments(NetspeedServiceArrayListRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -537,7 +541,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error Get Building Apartments");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -550,7 +554,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceAddressDetailsResponse GetApartmentAddress(NetspeedServiceAddressDetailsRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -601,7 +605,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error Get Apartment Address");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceAddressDetailsResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -615,7 +619,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceSubscriberGetBillsResponse GetBills(NetspeedServiceSubscriberGetBillsRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 using (var db = new RadiusR.DB.RadiusREntities())
@@ -729,7 +733,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error Get Subscriber unpaid bill list");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -743,7 +747,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServicePaymentVPOSResponse SubscriberPaymentVPOS(NetspeedServicePaymentVPOSRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -813,7 +817,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error Get Subscriber payment VPOS");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -827,7 +831,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceNewCustomerRegisterResponse NewCustomerRegister(NetspeedServiceNewCustomerRegisterRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -1040,7 +1044,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (NullReferenceException ex)
             {
-                Errorslogger.Error(ex, "Error Null Reference Exception");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                 {
                     Data = null,
@@ -1051,7 +1055,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error Get new customer register");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -1065,7 +1069,7 @@ namespace RadiusR.API.Netspeed
         //public BaseResponse<Dictionary<string, string>, SHA1> ExistingCustomerRegister(request<ExistingCustomerRegisterRequest, SHA1> request)
         //{
         //    var password = _password;
-        //    var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+        //    var passwordHash = HashUtilities.GetHexString<SHA1>(password);
         //    try
         //    {
         //        if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -1105,19 +1109,19 @@ namespace RadiusR.API.Netspeed
         //    catch (NullReferenceException ex)
         //    {
         //        Errorslogger.Error(ex, "Error Null Reference Exception");
-        //        return CommonResponse<Dictionary<string, string>, SHA1>.NullObjectException(HashUtilities.CalculateHash<SHA1>(password), request);
+        //        return CommonResponse<Dictionary<string, string>, SHA1>.NullObjectException(HashUtilities.GetHexString<SHA1>(password), request);
         //    }
         //    catch (Exception ex)
         //    {
         //        Errorslogger.Error(ex, "Error Get new customer register");
-        //        return CommonResponse<Dictionary<string, string>, SHA1>.InternalException(HashUtilities.CalculateHash<SHA1>(password), request);
+        //        return CommonResponse<Dictionary<string, string>, SHA1>.InternalException(HashUtilities.GetHexString<SHA1>(password), request);
         //    }
         //}
 
         public NetspeedServicePayBillsResponse PayBills(NetspeedServicePayBillsRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -1174,7 +1178,8 @@ namespace RadiusR.API.Netspeed
                     }
                     var payResponse = RadiusR.DB.Utilities.Billing.BillPayment.PayBills(db, Bills, PaymentType.VirtualPos, BillPayment.AccountantType.Seller);
                     db.SaveChanges();
-                    PaidLogger.Info($"Paid Successful. Bills : {string.Join("-", Bills.Select(b => b.ID.ToString()))}");
+                    PaidLogger.LogInfo(request.Username, $"Paid Successful. Bills : {string.Join("-", Bills.Select(b => b.ID.ToString()))}");
+                    //PaidLogger.Info($"Paid Successful. Bills : {string.Join("-", Bills.Select(b => b.ID.ToString()))}");
                     return new NetspeedServicePayBillsResponse(passwordHash, request)
                     {
                         Data = new PayBillsResponse()
@@ -1189,7 +1194,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error pay bills");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServicePayBillsResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -1204,7 +1209,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceSendGenericSMSResponse SendGenericSMS(NetspeedServiceSendGenericSMSRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -1231,7 +1236,7 @@ namespace RadiusR.API.Netspeed
                 CacheManager.Set(randomPassword.ToString(), request.Data.CustomerPhoneNo, Properties.Settings.Default.PasswordDuration);
                 SMSService SMS = new SMSService();
                 SMS.SendGenericSMS(request.Data.CustomerPhoneNo, request.Culture, rawText: string.Format(Localization.Common.RegisterSMS, randomPassword, Properties.Settings.Default.PasswordDuration));
-                SMSLogger.Error($"Sent sms to {request.Data.CustomerPhoneNo} . password is {randomPassword}");
+                SMSLogger.LogInfo(request.Username, $"Sent sms to {request.Data.CustomerPhoneNo} . password is {randomPassword}");
                 return new NetspeedServiceSendGenericSMSResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -1242,7 +1247,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error send generic sms");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceSendGenericSMSResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -1255,7 +1260,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceRegisterSMSValidationResponse RegisterSMSValidation(NetspeedServiceRegisterSMSValidationRequest request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -1270,7 +1275,7 @@ namespace RadiusR.API.Netspeed
                 }
                 if (string.IsNullOrEmpty(request.Data.CustomerPhoneNo) || string.IsNullOrEmpty(request.Data.Password))
                 {
-                    Errorslogger.Error($"Null object error. Phone No : {request.Data.CustomerPhoneNo} - Password : {request.Data.Password}");
+                    //Errorslogger.Error($"Null object error. Phone No : {request.Data.CustomerPhoneNo} - Password : {request.Data.Password}");
                     return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
                     {
                         Culture = request.Culture,
@@ -1282,7 +1287,7 @@ namespace RadiusR.API.Netspeed
                 var getCacheValue = CacheManager.Get(request.Data.CustomerPhoneNo);
                 if (string.IsNullOrEmpty(getCacheValue))
                 {
-                    SMSLogger.Error($"SMS validation is failed. key : {request.Data.CustomerPhoneNo} - value : {request.Data.Password} ");
+                    SMSLogger.LogInfo(request.Username, $"SMS validation is failed. key : {request.Data.CustomerPhoneNo} - value : {request.Data.Password} ");
                     return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
                     {
                         Culture = request.Culture,
@@ -1302,7 +1307,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "Error sms validation");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -1340,7 +1345,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceArrayListResponse GetNationalities(NetspeedServiceRequests request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -1368,7 +1373,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "'exception'");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -1382,7 +1387,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceArrayListResponse GetSexes(NetspeedServiceRequests request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -1410,7 +1415,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "'exception'");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -1424,7 +1429,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceArrayListResponse GetProfessions(NetspeedServiceRequests request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -1452,7 +1457,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "'exception'");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -1466,7 +1471,7 @@ namespace RadiusR.API.Netspeed
         public NetspeedServiceArrayListResponse GetIDCardTypes(NetspeedServiceRequests request)
         {
             var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.CalculateHash<SHA1>(password);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
@@ -1494,7 +1499,7 @@ namespace RadiusR.API.Netspeed
             }
             catch (Exception ex)
             {
-                Errorslogger.Error(ex, "'exception'");
+                Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
                     Culture = request.Culture,
@@ -1503,6 +1508,10 @@ namespace RadiusR.API.Netspeed
                     Username = request.Username
                 };
             }
+        }
+        public string GetKeyFragment(string username)
+        {
+            return KeyManager.GenerateKeyFragment(username, ServiceSettings.Duration());
         }
 
     }

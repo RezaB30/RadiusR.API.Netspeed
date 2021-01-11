@@ -58,5 +58,7 @@ namespace RadiusR.API.Netspeed
         NetspeedServiceArrayListResponse GetProfessions(NetspeedServiceRequests request);
         [OperationContract]
         NetspeedServiceArrayListResponse GetIDCardTypes(NetspeedServiceRequests request);
+        [OperationContract]
+        string GetKeyFragment(string username);
     }
 }
