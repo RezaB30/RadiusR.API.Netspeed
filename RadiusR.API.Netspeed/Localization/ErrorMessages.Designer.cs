@@ -61,6 +61,15 @@ namespace RadiusR.API.Netspeed.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Customer already registered.
+        /// </summary>
+        public static string AlreadyHaveCustomer {
+            get {
+                return ResourceManager.GetString("AlreadyHaveCustomer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Authentication Failed.
         /// </summary>
         public static string AuthenticationFailed {

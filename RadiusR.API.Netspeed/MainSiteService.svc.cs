@@ -45,23 +45,23 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = null,
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
-                        Username = request.Username
+
                     };
                 }
                 var result = AddressClient.GetProvinces();
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
+
+                    ValueNamePairList = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                     {
                         Code = p.Code,
                         Name = p.Name
                     }) : Enumerable.Empty<ValueNamePair>(),
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Username = request.Username
+
                 };
             }
             catch (Exception ex)
@@ -70,10 +70,10 @@ namespace RadiusR.API.Netspeed
                 //Errorslogger.Error(ex, "Error Get Provinces");
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    ValueNamePairList = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture),
-                    Username = request.Username
+
                 };
             }
         }
@@ -94,10 +94,10 @@ namespace RadiusR.API.Netspeed
                         {
                             return new NetspeedServiceRegisterCustomerContactResponse(passwordHash, request)
                             {
-                                Culture = request.Culture,
-                                Username = request.Username,
+
+
                                 ResponseMessage = CommonResponse.NullObjectException(request.Culture),
-                                Data = null
+                                RegisterCustomerContactResponse = null
                             };
                         }
                         var description = $"{request.CustomerContactParameters.FullName}{Environment.NewLine}{request.CustomerContactParameters.PhoneNo}";
@@ -124,17 +124,15 @@ namespace RadiusR.API.Netspeed
                         db.SaveChanges();
                         return new NetspeedServiceRegisterCustomerContactResponse(passwordHash, request)
                         {
-                            Culture = request.Culture,
+
                             ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                            Data = true,
-                            Username = request.Username
+                            RegisterCustomerContactResponse = true,
+
                         };
                     }
                     return new NetspeedServiceRegisterCustomerContactResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Username = request.Username,
-                        Data = false,
+                        RegisterCustomerContactResponse = false,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
                     };
                 }
@@ -144,10 +142,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceRegisterCustomerContactResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = false,
+
+                    RegisterCustomerContactResponse = false,
                     ResponseMessage = CommonResponse.InternalException(request.Culture),
-                    Username = request.Username
+
                 };
             }
         }
@@ -162,9 +160,7 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceServiceAvailabilityResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Username = request.Username,
-                        Data = null,
+                        ServiceAvailabilityResponse = null,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
                     };
                 }
@@ -201,10 +197,10 @@ namespace RadiusR.API.Netspeed
                     var address = addressServiceClient.GetAddressFromCode(Convert.ToInt64(request.ServiceAvailabilityParameters.bbk));
                     return new NetspeedServiceServiceAvailabilityResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Username = request.Username,
+
+
                         ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                        Data = new ServiceAvailabilityResponse()
+                        ServiceAvailabilityResponse = new ServiceAvailabilityResponse()
                         {
                             address = address.InternalException == null ? address.Data.AddressText : "-",
                             HasInfrastructureAdsl = HasInfrastructureAdsl,
@@ -233,10 +229,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceServiceAvailabilityResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
+
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Data = null,
-                    Username = request.Username
+                    ServiceAvailabilityResponse = null,
+
                 };
             }
         }
@@ -251,9 +247,7 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Username = request.Username,
-                        Data = null,
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
                     };
                 }
@@ -261,23 +255,23 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = null,
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.NullObjectException(request.Culture),
-                        Username = request.Username
+
                     };
                 }
                 var result = AddressClient.GetProvinceDistricts(request.ItemCode.Value);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
+
+                    ValueNamePairList = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                     {
                         Code = p.Code,
                         Name = p.Name
                     }) : Enumerable.Empty<ValueNamePair>(),
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Username = request.Username
+
                 };
             }
             catch (Exception ex)
@@ -285,10 +279,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    ValueNamePairList = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture),
-                    Username = request.Username
+
                 };
             }
         }
@@ -303,9 +297,7 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Username = request.Username,
-                        Data = null,
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
                     };
                 }
@@ -313,23 +305,23 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = null,
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.NullObjectException(request.Culture),
-                        Username = request.Username
+
                     };
                 }
                 var result = AddressClient.GetDistrictRuralRegions(request.ItemCode.Value);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
+
+                    ValueNamePairList = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                     {
                         Code = p.Code,
                         Name = p.Name
                     }) : Enumerable.Empty<ValueNamePair>(),
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Username = request.Username
+
                 };
             }
             catch (Exception ex)
@@ -337,10 +329,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    ValueNamePairList = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture),
-                    Username = request.Username
+
                 };
             }
         }
@@ -355,9 +347,9 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Username = request.Username,
-                        Data = null,
+
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
                     };
                 }
@@ -365,23 +357,23 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = null,
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.NullObjectException(request.Culture),
-                        Username = request.Username
+
                     };
                 }
                 var result = AddressClient.GetRuralRegionNeighbourhoods(request.ItemCode.Value);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
+
+                    ValueNamePairList = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                     {
                         Code = p.Code,
                         Name = p.Name
                     }) : Enumerable.Empty<ValueNamePair>(),
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Username = request.Username
+
                 };
             }
             catch (Exception ex)
@@ -389,10 +381,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    ValueNamePairList = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture),
-                    Username = request.Username
+
                 };
             }
         }
@@ -407,9 +399,9 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Username = request.Username,
-                        Data = null,
+
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
                     };
                 }
@@ -417,23 +409,23 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = null,
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.NullObjectException(request.Culture),
-                        Username = request.Username
+
                     };
                 }
                 var result = AddressClient.GetNeighbourhoodStreets(request.ItemCode.Value);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
+
+                    ValueNamePairList = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                     {
                         Code = p.Code,
                         Name = p.Name
                     }) : Enumerable.Empty<ValueNamePair>(),
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Username = request.Username
+
                 };
             }
             catch (Exception ex)
@@ -441,10 +433,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    ValueNamePairList = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture),
-                    Username = request.Username
+
                 };
             }
         }
@@ -459,9 +451,9 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Username = request.Username,
-                        Data = null,
+
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
                     };
                 }
@@ -469,23 +461,23 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = null,
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.NullObjectException(request.Culture),
-                        Username = request.Username
+
                     };
                 }
                 var result = AddressClient.GetStreetBuildings(request.ItemCode.Value);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
+
+                    ValueNamePairList = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                     {
                         Code = p.Code,
                         Name = p.Name
                     }) : Enumerable.Empty<ValueNamePair>(),
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Username = request.Username
+
                 };
             }
             catch (Exception ex)
@@ -493,10 +485,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    ValueNamePairList = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture),
-                    Username = request.Username
+
                 };
             }
         }
@@ -510,9 +502,9 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Username = request.Username,
-                        Data = null,
+
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture)
                     };
                 }
@@ -520,23 +512,23 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = null,
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.NullObjectException(request.Culture),
-                        Username = request.Username
+
                     };
                 }
                 var result = AddressClient.GetBuildingApartments(request.ItemCode.Value);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
+
+                    ValueNamePairList = result.ErrorOccured == false ? result.Data.Select(p => new ValueNamePair()
                     {
                         Code = p.Code,
                         Name = p.Name
                     }) : Enumerable.Empty<ValueNamePair>(),
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Username = request.Username
+
                 };
             }
             catch (Exception ex)
@@ -544,10 +536,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    ValueNamePairList = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture),
-                    Username = request.Username
+
                 };
             }
         }
@@ -561,27 +553,27 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceAddressDetailsResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Username = request.Username,
+
+
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
-                        Data = null
+                        AddressDetailsResponse = null
                     };
                 }
                 if (request.BBK == null)
                 {
                     return new NetspeedServiceAddressDetailsResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = null,
+
+                        AddressDetailsResponse = null,
                         ResponseMessage = CommonResponse.NullObjectException(request.Culture),
-                        Username = request.Username
+
                     };
                 }
                 var result = AddressClient.GetApartmentAddress(request.BBK.Value);
                 return new NetspeedServiceAddressDetailsResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = new AddressDetailsResponse()
+
+                    AddressDetailsResponse = new AddressDetailsResponse()
                     {
                         AddressNo = result.Data.AddressNo,
                         AddressText = result.Data.AddressText,
@@ -600,7 +592,7 @@ namespace RadiusR.API.Netspeed
                         StreetName = result.Data.StreetName
                     },
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Username = request.Username
+
                 };
             }
             catch (Exception ex)
@@ -608,10 +600,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceAddressDetailsResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    AddressDetailsResponse = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
-                    Username = request.Username
+
                 };
             }
         }
@@ -630,16 +622,16 @@ namespace RadiusR.API.Netspeed
                         {
                             request.GetBillParameters.PhoneNo = request.GetBillParameters.PhoneNo.TrimStart('0');
                         }
-                        if (request.Data.TCKOrSubscriberNo.Length == 11)
+                        if (request.GetBillParameters.TCKOrSubscriberNo.Length == 11)
                         {
                             var dbClient = db.Subscriptions.Where(s => s.Customer.CustomerIDCard.TCKNo == request.GetBillParameters.TCKOrSubscriberNo && s.Customer.ContactPhoneNo == request.GetBillParameters.PhoneNo).ToList();
                             if (dbClient == null || dbClient.Count() == 0)
                             {
                                 return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
                                 {
-                                    Culture = request.Culture,
-                                    Data = null,
-                                    Username = request.Username,
+
+                                    SubscriberGetBillsResponse = null,
+
                                     ResponseMessage = CommonResponse.SubscriberNotFoundErrorResponse(request.Culture),
                                 };
                             }
@@ -649,10 +641,10 @@ namespace RadiusR.API.Netspeed
                             {
                                 return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
                                 {
-                                    Culture = request.Culture,
+
                                     ResponseMessage = CommonResponse.BillsNotFoundException(request.Culture),
-                                    Username = request.Username,
-                                    Data = null,
+
+                                    SubscriberGetBillsResponse = null,
                                 };
                             }
                             var HasMoreSubscription = dbSubscriptionBills.GroupBy(m => m.SubscriptionID).Count() > 1;
@@ -660,10 +652,10 @@ namespace RadiusR.API.Netspeed
                             {
                                 return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
                                 {
-                                    Culture = request.Culture,
-                                    Username = request.Username,
+
+
                                     ResponseMessage = CommonResponse.HasMoreSubscription(request.Culture),
-                                    Data = null,
+                                    SubscriberGetBillsResponse = null,
                                 };
                             }
                             var firstUnpaidBill = dbSubscriptionBills.Where(bill => bill.BillStatusID == (short)RadiusR.DB.Enums.BillState.Unpaid).OrderBy(bill => bill.IssueDate).FirstOrDefault();
@@ -683,10 +675,10 @@ namespace RadiusR.API.Netspeed
 
                             return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
                             {
-                                Culture = request.Culture,
-                                Data = result.ToArray(),
+
+                                SubscriberGetBillsResponse = result.ToArray(),
                                 ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                                Username = request.Username
+
                             };
                         }
                         else
@@ -695,9 +687,9 @@ namespace RadiusR.API.Netspeed
                             if (dbClient == null)
                                 return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
                                 {
-                                    Culture = request.Culture,
-                                    Data = null,
-                                    Username = request.Username,
+
+                                    SubscriberGetBillsResponse = null,
+
                                     ResponseMessage = CommonResponse.SubscriberNotFoundErrorResponse(request.Culture),
                                 };
                             var firstUnpaidBill = dbClient.Bills.Where(bill => bill.BillStatusID == (short)RadiusR.DB.Enums.BillState.Unpaid).OrderBy(bill => bill.IssueDate).FirstOrDefault();
@@ -716,18 +708,18 @@ namespace RadiusR.API.Netspeed
                             );
                             return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
                             {
-                                Culture = request.Culture,
-                                Data = result.ToArray(),
+
+                                SubscriberGetBillsResponse = result.ToArray(),
                                 ResponseMessage = CommonResponse.SuccessResponse(request.Culture)
                             };
                         }
                     }
                     return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
+
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
-                        Username = request.Username,
-                        Data = null
+
+                        SubscriberGetBillsResponse = null
                     };
                 }
             }
@@ -736,10 +728,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    SubscriberGetBillsResponse = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
-                    Username = request.Username
+
                 };
             }
         }
@@ -754,33 +746,33 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
+
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
-                        Username = request.Username,
-                        Data = null
+
+                        PaymentVPOSResponse = null
                     };
                 }
-                if (request.Data.BillIds == null || request.Data.BillIds.Count() == 0)
+                if (request.PaymentVPOSParameters.BillIds == null || request.PaymentVPOSParameters.BillIds.Count() == 0)
                 {
                     return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = null,
+
+                        PaymentVPOSResponse = null,
                         ResponseMessage = CommonResponse.NullObjectException(request.Culture),
-                        Username = request.Username
+
                     };
                 }
                 using (RadiusREntities db = new RadiusREntities())
                 {
-                    var dbSubscriptionBills = db.Bills.Where(bill => request.Data.BillIds.Contains(bill.ID) && bill.BillStatusID == (short)BillState.Unpaid).ToArray();
-                    if (dbSubscriptionBills == null || dbSubscriptionBills.Count() != request.Data.BillIds.Count())
+                    var dbSubscriptionBills = db.Bills.Where(bill => request.PaymentVPOSParameters.BillIds.Contains(bill.ID) && bill.BillStatusID == (short)BillState.Unpaid).ToArray();
+                    if (dbSubscriptionBills == null || dbSubscriptionBills.Count() != request.PaymentVPOSParameters.BillIds.Count())
                     {
                         return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
                         {
-                            Culture = request.Culture,
+
                             ResponseMessage = CommonResponse.WrongOrInvalidBills(request.Culture),
-                            Username = request.Username,
-                            Data = null,
+
+                            PaymentVPOSResponse = null,
                         };
                     }
                     var HasMoreSubscription = dbSubscriptionBills.GroupBy(m => m.SubscriptionID).Count() > 1;
@@ -788,10 +780,10 @@ namespace RadiusR.API.Netspeed
                     {
                         return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
                         {
-                            Culture = request.Culture,
-                            Username = request.Username,
+
+
                             ResponseMessage = CommonResponse.HasMoreSubscription(request.Culture),
-                            Data = null,
+                            PaymentVPOSResponse = null,
                         };
                     }
                     var dbSubscription = db.Subscriptions.Find(dbSubscriptionBills.FirstOrDefault().SubscriptionID);
@@ -805,13 +797,13 @@ namespace RadiusR.API.Netspeed
                     var htmlForm = VPOSModel.GetHtmlForm().ToHtmlString();
                     return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
                     {
-                        Data = new PaymentVPOSResponse()
+                        PaymentVPOSResponse = new PaymentVPOSResponse()
                         {
                             HtmlForm = htmlForm,
                         },
-                        Culture = request.Culture,
+
                         ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                        Username = request.Username
+
                     };
                 }
             }
@@ -820,10 +812,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    PaymentVPOSResponse = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
-                    Username = request.Username
+
                 };
             }
         }
@@ -838,10 +830,10 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
+
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
-                        Username = request.Username,
-                        Data = null
+
+                        NewCustomerRegisterResponse = null
                     };
                 }
                 using (var db = new RadiusR.DB.RadiusREntities())
@@ -1022,23 +1014,31 @@ namespace RadiusR.API.Netspeed
                         }
                         return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                         {
-                            Data = valuePairs,
-                            Culture = request.Culture,
+                            NewCustomerRegisterResponse = valuePairs,
+
                             ResponseMessage = CommonResponse.FailedResponse(request.Culture),
-                            Username = request.Username
+
                         };
                     }
-                    if (registeredCustomer != null)
+                    if (registeredCustomer == null)
                     {
-                        db.Customers.Add(registeredCustomer);
+                        return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+                        {
+                            ResponseMessage = CommonResponse.HaveAlreadyCustomer(request.Culture),
+                            NewCustomerRegisterResponse = null
+                        };
                     }
+                    //if (registeredCustomer != null)
+                    //{
+                    //    db.Customers.Add(registeredCustomer);
+                    //}
                     db.SaveChanges();
                     return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                     {
-                        Data = valuePairs,
-                        Culture = request.Culture,
+                        NewCustomerRegisterResponse = valuePairs,
+
                         ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                        Username = request.Username
+
                     };
                 }
             }
@@ -1047,9 +1047,7 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                 {
-                    Data = null,
-                    Username = request.Username,
-                    Culture = request.Culture,
+                    NewCustomerRegisterResponse = null,
                     ResponseMessage = CommonResponse.NullObjectException(request.Culture)
                 };
             }
@@ -1058,9 +1056,7 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
-                    Username = request.Username,
+                    NewCustomerRegisterResponse = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture)
                 };
             }
@@ -1092,17 +1088,17 @@ namespace RadiusR.API.Netspeed
         //                return new BaseResponse<Dictionary<string, string>, SHA1>(passwordHash, request)
         //                {
         //                    Data = valuePairs,
-        //                    Culture = request.Culture,
+        //                    
         //                    ResponseMessage = CommonResponse<Dictionary<string, string>, SHA1>.FailedResponse(request.Culture),
-        //                    Username = request.Username
+        //                    
         //                };
         //            }
         //            return new BaseResponse<Dictionary<string, string>, SHA1>(passwordHash, request)
         //            {
         //                Data = valuePairs,
-        //                Culture = request.Culture,
+        //                
         //                ResponseMessage = CommonResponse<Dictionary<string, string>, SHA1>.SuccessResponse(request.Culture),
-        //                Username = request.Username
+        //                
         //            };
         //        }
         //    }
@@ -1128,10 +1124,10 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServicePayBillsResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
+
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
-                        Username = request.Username,
-                        Data = null,
+
+                        PayBillsResponse = null,
                     };
                 }
                 using (RadiusREntities db = new RadiusREntities())
@@ -1139,17 +1135,17 @@ namespace RadiusR.API.Netspeed
                     if (request.PayBillsParameters == null)
                         return new NetspeedServicePayBillsResponse(passwordHash, request)
                         {
-                            Culture = request.Culture,
-                            Data = null,
-                            Username = request.Username,
+
+                            PayBillsResponse = null,
+
                             ResponseMessage = CommonResponse.BillsNotFoundException(request.Culture)
                         };
                     if (request.PayBillsParameters.Count() == 0)
                         return new NetspeedServicePayBillsResponse(passwordHash, request)
                         {
-                            Culture = request.Culture,
-                            Data = null,
-                            Username = request.Username,
+
+                            PayBillsResponse = null,
+
                             ResponseMessage = CommonResponse.BillsNotFoundException(request.Culture)
                         };
                     //
@@ -1159,21 +1155,21 @@ namespace RadiusR.API.Netspeed
                     {
                         return new NetspeedServicePayBillsResponse(passwordHash, request)
                         {
-                            Culture = request.Culture,
-                            Username = request.Username,
+
+
                             ResponseMessage = CommonResponse.HasMoreSubscription(request.Culture),
-                            Data = null,
+                            PayBillsResponse = null,
                         };
                     }
                     //
-                    if (Bills.Count() != request.Data.Count())
+                    if (Bills.Count() != request.PayBillsParameters.Count())
                     {
                         return new NetspeedServicePayBillsResponse(passwordHash, request)
                         {
-                            Culture = request.Culture,
+
                             ResponseMessage = CommonResponse.WrongOrInvalidBills(request.Culture),
-                            Username = request.Username,
-                            Data = null,
+
+                            PayBillsResponse = null,
                         };
                     }
                     var payResponse = RadiusR.DB.Utilities.Billing.BillPayment.PayBills(db, Bills, PaymentType.VirtualPos, BillPayment.AccountantType.Seller);
@@ -1182,13 +1178,13 @@ namespace RadiusR.API.Netspeed
                     //PaidLogger.Info($"Paid Successful. Bills : {string.Join("-", Bills.Select(b => b.ID.ToString()))}");
                     return new NetspeedServicePayBillsResponse(passwordHash, request)
                     {
-                        Data = new PayBillsResponse()
+                        PayBillsResponse = new PayBillsResponse()
                         {
                             PaymentResponse = payResponse.ToString()
                         },
-                        Culture = request.Culture,
+
                         ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                        Username = request.Username
+
                     };
                 }
             }
@@ -1197,10 +1193,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServicePayBillsResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    PayBillsResponse = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
-                    Username = request.Username
+
                 };
             }
         }
@@ -1216,33 +1212,28 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceSendGenericSMSResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = false,
+
+                        SMSCode = null,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
-                        Username = request.Username,
                     };
                 }
-                if (string.IsNullOrEmpty(request.Data.CustomerPhoneNo))
+                if (string.IsNullOrEmpty(request.SendGenericSMSParameters.CustomerPhoneNo))
                 {
                     return new NetspeedServiceSendGenericSMSResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = false,
+                        SMSCode = null,
                         ResponseMessage = CommonResponse.NullObjectException(request.Culture),
-                        Username = request.Username,
                     };
                 }
                 var randomPassword = random.Next(100000, 999999);
-                CacheManager.Set(randomPassword.ToString(), request.Data.CustomerPhoneNo, Properties.Settings.Default.PasswordDuration);
+                //CacheManager.Set(randomPassword.ToString(), request.SendGenericSMSParameters.CustomerPhoneNo, Properties.Settings.Default.PasswordDuration);
                 SMSService SMS = new SMSService();
-                SMS.SendGenericSMS(request.Data.CustomerPhoneNo, request.Culture, rawText: string.Format(Localization.Common.RegisterSMS, randomPassword, Properties.Settings.Default.PasswordDuration));
-                SMSLogger.LogInfo(request.Username, $"Sent sms to {request.Data.CustomerPhoneNo} . password is {randomPassword}");
+                SMS.SendGenericSMS(request.SendGenericSMSParameters.CustomerPhoneNo, request.Culture, rawText: string.Format(Localization.Common.RegisterSMS, randomPassword, Properties.Settings.Default.PasswordDuration));
+                SMSLogger.LogInfo(request.Username, $"Sent sms to {request.SendGenericSMSParameters.CustomerPhoneNo} . password is {randomPassword}");
                 return new NetspeedServiceSendGenericSMSResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Username = request.Username,
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Data = true,
+                    SMSCode = randomPassword.ToString(),
                 };
             }
             catch (Exception ex)
@@ -1250,73 +1241,71 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceSendGenericSMSResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = false,
+                    SMSCode = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
-                    Username = request.Username
-                };
-            }
-        }
-        public NetspeedServiceRegisterSMSValidationResponse RegisterSMSValidation(NetspeedServiceRegisterSMSValidationRequest request)
-        {
-            var password = ServiceSettings.Password(request.Username);
-            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
-            try
-            {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
-                {
-                    return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
-                    {
-                        Culture = request.Culture,
-                        Data = false,
-                        ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
-                        Username = request.Username,
-                    };
-                }
-                if (string.IsNullOrEmpty(request.Data.CustomerPhoneNo) || string.IsNullOrEmpty(request.Data.Password))
-                {
-                    //Errorslogger.Error($"Null object error. Phone No : {request.Data.CustomerPhoneNo} - Password : {request.Data.Password}");
-                    return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
-                    {
-                        Culture = request.Culture,
-                        Data = false,
-                        ResponseMessage = CommonResponse.NullObjectException(request.Culture),
-                        Username = request.Username,
-                    };
-                }
-                var getCacheValue = CacheManager.Get(request.Data.CustomerPhoneNo);
-                if (string.IsNullOrEmpty(getCacheValue))
-                {
-                    SMSLogger.LogInfo(request.Username, $"SMS validation is failed. key : {request.Data.CustomerPhoneNo} - value : {request.Data.Password} ");
-                    return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
-                    {
-                        Culture = request.Culture,
-                        Data = false,
-                        ResponseMessage = CommonResponse.FailedResponse(request.Culture, Localization.ErrorMessages.ResourceManager.GetString("WrongSMSPassword", CultureInfo.CreateSpecificCulture(request.Culture))),
-                        Username = request.Username,
-                    };
-                }
-                return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
-                {
-                    Culture = request.Culture,
-                    Data = true,
-                    ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Username = request.Username,
-                };
 
-            }
-            catch (Exception ex)
-            {
-                Errorslogger.LogException(request.Username, ex);
-                return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
-                {
-                    Culture = request.Culture,
-                    Data = false,
-                    ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
-                    Username = request.Username
                 };
             }
         }
+        //public NetspeedServiceRegisterSMSValidationResponse RegisterSMSValidation(NetspeedServiceRegisterSMSValidationRequest request)
+        //{
+        //    var password = ServiceSettings.Password(request.Username);
+        //    var passwordHash = HashUtilities.GetHexString<SHA1>(password);
+        //    try
+        //    {
+        //        if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+        //        {
+        //            return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
+        //            {
+
+        //                IsSuccess = false,
+        //                ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+
+        //            };
+        //        }
+        //        if (string.IsNullOrEmpty(request.RegisterSMSValidationParameters.CustomerPhoneNo) || string.IsNullOrEmpty(request.RegisterSMSValidationParameters.Password))
+        //        {
+        //            //Errorslogger.Error($"Null object error. Phone No : {request.Data.CustomerPhoneNo} - Password : {request.Data.Password}");
+        //            return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
+        //            {
+
+        //                IsSuccess = false,
+        //                ResponseMessage = CommonResponse.NullObjectException(request.Culture),
+
+        //            };
+        //        }
+        //        var getCacheValue = CacheManager.Get(request.RegisterSMSValidationParameters.CustomerPhoneNo);
+        //        if (string.IsNullOrEmpty(getCacheValue))
+        //        {
+        //            SMSLogger.LogInfo(request.Username, $"SMS validation is failed. key : {request.RegisterSMSValidationParameters.CustomerPhoneNo} - value : {request.RegisterSMSValidationParameters.Password} ");
+        //            return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
+        //            {
+        //                IsSuccess = false,
+        //                ResponseMessage = CommonResponse.FailedResponse(request.Culture, Localization.ErrorMessages.ResourceManager.GetString("WrongSMSPassword", CultureInfo.CreateSpecificCulture(request.Culture))),
+
+        //            };
+        //        }
+        //        return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
+        //        {
+
+        //            IsSuccess = true,
+        //            ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+
+        //        };
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Errorslogger.LogException(request.Username, ex);
+        //        return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
+        //        {
+
+        //            IsSuccess = false,
+        //            ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
+
+        //        };
+        //    }
+        //}
         #region
         private decimal GetPayableAmount(Subscription dbSubscription, long? billId)
         {
@@ -1352,19 +1341,19 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = null,
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
-                        Username = request.Username,
+
                     };
                 }
                 var list = new LocalizedList<CountryCodes, RadiusR.Localization.Lists.CountryCodes>().GetList(CultureInfo.CreateSpecificCulture(request.Culture));
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Username = request.Username,
+
+
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Data = list.Select(l => new ValueNamePair()
+                    ValueNamePairList = list.Select(l => new ValueNamePair()
                     {
                         Code = l.Key,
                         Name = l.Value
@@ -1376,10 +1365,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    ValueNamePairList = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
-                    Username = request.Username
+
                 };
             }
         }
@@ -1394,19 +1383,19 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = null,
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
-                        Username = request.Username,
+
                     };
                 }
                 var list = new LocalizedList<Sexes, RadiusR.Localization.Lists.Sexes>().GetList(CultureInfo.CreateSpecificCulture(request.Culture));
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Username = request.Username,
+
+
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Data = list.Select(l => new ValueNamePair()
+                    ValueNamePairList = list.Select(l => new ValueNamePair()
                     {
                         Code = l.Key,
                         Name = l.Value
@@ -1418,10 +1407,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    ValueNamePairList = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
-                    Username = request.Username
+
                 };
             }
         }
@@ -1436,19 +1425,19 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = null,
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
-                        Username = request.Username,
+
                     };
                 }
                 var list = new LocalizedList<Profession, RadiusR.Localization.Lists.Profession>().GetList(CultureInfo.CreateSpecificCulture(request.Culture));
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Username = request.Username,
+
+
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Data = list.Select(l => new ValueNamePair()
+                    ValueNamePairList = list.Select(l => new ValueNamePair()
                     {
                         Code = l.Key,
                         Name = l.Value
@@ -1460,10 +1449,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    ValueNamePairList = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
-                    Username = request.Username
+
                 };
             }
         }
@@ -1478,19 +1467,19 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
-                        Culture = request.Culture,
-                        Data = null,
+
+                        ValueNamePairList = null,
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
-                        Username = request.Username,
+
                     };
                 }
                 var list = new LocalizedList<IDCardTypes, RadiusR.Localization.Lists.IDCardTypes>().GetList(CultureInfo.CreateSpecificCulture(request.Culture));
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Username = request.Username,
+
+
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    Data = list.Select(l => new ValueNamePair()
+                    ValueNamePairList = list.Select(l => new ValueNamePair()
                     {
                         Code = l.Key,
                         Name = l.Value
@@ -1502,10 +1491,10 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceArrayListResponse(passwordHash, request)
                 {
-                    Culture = request.Culture,
-                    Data = null,
+
+                    ValueNamePairList = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
-                    Username = request.Username
+
                 };
             }
         }

@@ -75,6 +75,14 @@ namespace RadiusR.API.Netspeed
                 ErrorMessage = new RezaB.Data.Localization.LocalizedList<ErrorCodes, ErrorMessages>().GetDisplayText((int)ErrorCodes.HasMoreSubscription, CreateCulture(culture))
             };
         }
+        public static ServiceResponse HaveAlreadyCustomer(string culture)
+        {
+            return new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.AlreadyHaveCustomer,
+                ErrorMessage = new RezaB.Data.Localization.LocalizedList<ErrorCodes, ErrorMessages>().GetDisplayText((int)ErrorCodes.AlreadyHaveCustomer, CreateCulture(culture))
+            };
+        }
         public static ServiceResponse WrongOrInvalidBills(string culture)
         {
             return new ServiceResponse()

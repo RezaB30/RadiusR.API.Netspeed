@@ -48,8 +48,8 @@ namespace RadiusR.API.Netspeed
         //NetspeedServiceVPOSLoggerResponse VPOSFailLogger(NetspeedServiceVPOSLoggerRequest request);
         [OperationContract]
         NetspeedServiceSendGenericSMSResponse SendGenericSMS(NetspeedServiceSendGenericSMSRequest request);
-        [OperationContract]
-        NetspeedServiceRegisterSMSValidationResponse RegisterSMSValidation(NetspeedServiceRegisterSMSValidationRequest request);
+        //[OperationContract]
+        //NetspeedServiceRegisterSMSValidationResponse RegisterSMSValidation(NetspeedServiceRegisterSMSValidationRequest request);
         [OperationContract]
         NetspeedServiceArrayListResponse GetNationalities(NetspeedServiceRequests request);
         [OperationContract]

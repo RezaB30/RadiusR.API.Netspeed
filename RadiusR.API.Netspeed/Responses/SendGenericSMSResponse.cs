@@ -9,10 +9,10 @@ using System.Web;
 namespace RadiusR.API.Netspeed.Responses
 {
     [DataContract]
-    public partial class NetspeedServiceSendGenericSMSResponse : BaseResponse<bool?, SHA1>
+    public partial class NetspeedServiceSendGenericSMSResponse : BaseResponse<string, SHA1>
     {
         public NetspeedServiceSendGenericSMSResponse(string passwordHash, BaseRequest<SHA1> baseRequest) : base(passwordHash, baseRequest) { }
         [DataMember]
-        public bool? IsSuccess { get { return Data; } set { Data = value; } }
+        public string SMSCode { get { return Data; } set { Data = value; } }
     }
 }
