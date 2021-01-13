@@ -838,6 +838,16 @@ namespace RadiusR.API.Netspeed
                 }
                 using (var db = new RadiusR.DB.RadiusREntities())
                 {
+                    var specialOfferId = db.SpecialOffers.Where(s => s.IsReferral == true && DateTime.Now > s.StartDate && DateTime.Now < s.EndDate).ToList();
+                    if (specialOfferId.Count != 1)
+                    {
+                        return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+                        {
+                            NewCustomerRegisterResponse = null,
+                            ResponseMessage = CommonResponse.SpecialOfferError(request.Culture)
+                        };
+                    }
+                    var currentSpecialOfferId = specialOfferId.FirstOrDefault().ID;
                     var registeredCustomer = new Customer();
                     var register = request.CustomerRegisterParameters;
                     CustomerRegistrationInfo registrationInfo = new CustomerRegistrationInfo()
@@ -1000,7 +1010,12 @@ namespace RadiusR.API.Netspeed
                                 StreetID = register.SubscriptionInfo.SetupAddress.StreetID,
                                 StreetName = register.SubscriptionInfo.SetupAddress.StreetName
                             },
-                            BillingPeriod = register.SubscriptionInfo.BillingPeriod
+                            BillingPeriod = register.SubscriptionInfo.BillingPeriod,
+                            ReferralDiscount = new CustomerRegistrationInfo.ReferralDiscountInfo()
+                            {
+                                ReferenceNo = request.CustomerRegisterParameters.SubscriptionInfo.ReferralDiscountInfo.ReferenceNo,
+                                SpecialOfferID = currentSpecialOfferId
+                            }
                         },
                     };
                     var result = RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration.Registration.RegisterSubscriptionWithNewCustomer(db, registrationInfo, out registeredCustomer);

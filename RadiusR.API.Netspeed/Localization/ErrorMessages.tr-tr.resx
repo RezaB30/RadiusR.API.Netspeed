@@ -138,6 +138,9 @@
   <data name="NullObjectFound" xml:space="preserve">
     <value>Boş parametre hatası</value>
   </data>
+  <data name="SpecialOfferError" xml:space="preserve">
+    <value>İşlem Başarısız. Referans numarası ile kayıt yapılamaz</value>
+  </data>
   <data name="SubscriberNotFound" xml:space="preserve">
     <value>Abone bulunamadı</value>
   </data>

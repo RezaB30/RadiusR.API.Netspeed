@@ -124,6 +124,15 @@ namespace RadiusR.API.Netspeed.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed. Registration is not possible with reference number..
+        /// </summary>
+        public static string SpecialOfferError {
+            get {
+                return ResourceManager.GetString("SpecialOfferError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Subscriber not found.
         /// </summary>
         public static string SubscriberNotFound {

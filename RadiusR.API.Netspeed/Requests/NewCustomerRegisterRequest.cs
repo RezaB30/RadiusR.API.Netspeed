@@ -188,6 +188,14 @@ namespace RadiusR.API.Netspeed.Requests
         public AddressInfo SetupAddress { get; set; }
         [DataMember]
         public int? BillingPeriod { get; set; }
+        [DataMember]
+        public ReferralDiscountInfo ReferralDiscountInfo { get; set; }
+    }
+    [DataContract]
+    public class ReferralDiscountInfo
+    {
+        public string ReferenceNo { get; set; }
+        //public int? SpecialOfferID { get; set; }
     }
     [DataContract]
     public partial class NetspeedServiceNewCustomerRegisterRequest : BaseRequest<NewCustomerRegisterRequest, SHA1>

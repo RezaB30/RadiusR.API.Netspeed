@@ -91,6 +91,14 @@ namespace RadiusR.API.Netspeed
                 ErrorMessage = new RezaB.Data.Localization.LocalizedList<ErrorCodes, ErrorMessages>().GetDisplayText((int)ErrorCodes.WrongOrInvalidBill, CreateCulture(culture))
             };
         }
+        public static ServiceResponse SpecialOfferError(string culture)
+        {
+            return new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.SpecialOfferError,
+                ErrorMessage = new RezaB.Data.Localization.LocalizedList<ErrorCodes, ErrorMessages>().GetDisplayText((int)ErrorCodes.SpecialOfferError, CreateCulture(culture))
+            };
+        }
         private static CultureInfo CreateCulture(string cultureName)
         {
             var currentCulture = CultureInfo.InvariantCulture;

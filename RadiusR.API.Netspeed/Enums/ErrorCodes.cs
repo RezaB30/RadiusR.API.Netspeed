@@ -15,6 +15,7 @@ namespace RadiusR.API.Netspeed.Enums
         HasMoreSubscription = 5,
         WrongOrInvalidBill = 6,
         AlreadyHaveCustomer = 7,
+        SpecialOfferError = 8,
         InternalServerError = 199,
         Failed = 200
     }

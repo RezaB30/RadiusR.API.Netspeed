@@ -138,6 +138,9 @@
   <data name="NullObjectFound" xml:space="preserve">
     <value>Null object error</value>
   </data>
+  <data name="SpecialOfferError" xml:space="preserve">
+    <value>Failed. Registration is not possible with reference number.</value>
+  </data>
   <data name="SubscriberNotFound" xml:space="preserve">
     <value>Subscriber not found</value>
   </data>
