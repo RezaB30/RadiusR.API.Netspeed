@@ -1,5 +1,6 @@
 ﻿using RadiusR.API.Netspeed.Enums;
 using RadiusR.API.Netspeed.Localization;
+using RadiusR.DB.Utilities.Billing;
 using RezaB.API.WebService;
 using System;
 using System.Collections.Generic;
@@ -97,6 +98,14 @@ namespace RadiusR.API.Netspeed
             {
                 ErrorCode = (int)ErrorCodes.SpecialOfferError,
                 ErrorMessage = new RezaB.Data.Localization.LocalizedList<ErrorCodes, ErrorMessages>().GetDisplayText((int)ErrorCodes.SpecialOfferError, CreateCulture(culture))
+            };
+        }
+        public static ServiceResponse PaymentResponse(string culture, BillPayment.ResponseType responseType)
+        {
+            return new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.Failed,
+                ErrorMessage = new RezaB.Data.Localization.LocalizedList<BillPayment.ResponseType, ErrorMessages>().GetDisplayText((int)responseType, CreateCulture(culture))
             };
         }
         private static CultureInfo CreateCulture(string cultureName)

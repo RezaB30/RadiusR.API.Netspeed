@@ -129,14 +129,29 @@
   <data name="Failed" xml:space="preserve">
     <value>Başarısız</value>
   </data>
+  <data name="HasCashierPays" xml:space="preserve">
+    <value>Kasiyer ödemesi bulunmakta</value>
+  </data>
   <data name="HasMoreSubscription" xml:space="preserve">
     <value>Müşterinin birden fazla aboneliği bulunmaktadır</value>
   </data>
   <data name="InternalServerError" xml:space="preserve">
     <value>İç Hata</value>
   </data>
+  <data name="InvalidBillState" xml:space="preserve">
+    <value>Geçersiz fatura durumu</value>
+  </data>
+  <data name="InvalidPaymentAmount" xml:space="preserve">
+    <value>Geçersiz ödeme tutaru</value>
+  </data>
+  <data name="NotEnoughCredit" xml:space="preserve">
+    <value>Yetersiz bakiye</value>
+  </data>
   <data name="NullObjectFound" xml:space="preserve">
     <value>Boş parametre hatası</value>
+  </data>
+  <data name="OnlyOneGatewayAllowed" xml:space="preserve">
+    <value>Yalnızda bir gateway ulaşabilir</value>
   </data>
   <data name="SpecialOfferError" xml:space="preserve">
     <value>İşlem Başarısız. Referans numarası ile kayıt yapılamaz</value>

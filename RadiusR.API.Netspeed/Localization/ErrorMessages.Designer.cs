@@ -97,6 +97,15 @@ namespace RadiusR.API.Netspeed.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Has Cashier Pays.
+        /// </summary>
+        public static string HasCashierPays {
+            get {
+                return ResourceManager.GetString("HasCashierPays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Customer has more subscription..
         /// </summary>
         public static string HasMoreSubscription {
@@ -115,11 +124,47 @@ namespace RadiusR.API.Netspeed.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Bill State.
+        /// </summary>
+        public static string InvalidBillState {
+            get {
+                return ResourceManager.GetString("InvalidBillState", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Payment Amount.
+        /// </summary>
+        public static string InvalidPaymentAmount {
+            get {
+                return ResourceManager.GetString("InvalidPaymentAmount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not Enough Credit.
+        /// </summary>
+        public static string NotEnoughCredit {
+            get {
+                return ResourceManager.GetString("NotEnoughCredit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Null object error.
         /// </summary>
         public static string NullObjectFound {
             get {
                 return ResourceManager.GetString("NullObjectFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only One Gateway Allowed.
+        /// </summary>
+        public static string OnlyOneGatewayAllowed {
+            get {
+                return ResourceManager.GetString("OnlyOneGatewayAllowed", resourceCulture);
             }
         }
         

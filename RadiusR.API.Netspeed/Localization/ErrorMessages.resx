@@ -129,14 +129,29 @@
   <data name="Failed" xml:space="preserve">
     <value>Failed</value>
   </data>
+  <data name="HasCashierPays" xml:space="preserve">
+    <value>Has Cashier Pays</value>
+  </data>
   <data name="HasMoreSubscription" xml:space="preserve">
     <value>Customer has more subscription.</value>
   </data>
   <data name="InternalServerError" xml:space="preserve">
     <value>Internal Server Error</value>
   </data>
+  <data name="InvalidBillState" xml:space="preserve">
+    <value>Invalid Bill State</value>
+  </data>
+  <data name="InvalidPaymentAmount" xml:space="preserve">
+    <value>Invalid Payment Amount</value>
+  </data>
+  <data name="NotEnoughCredit" xml:space="preserve">
+    <value>Not Enough Credit</value>
+  </data>
   <data name="NullObjectFound" xml:space="preserve">
     <value>Null object error</value>
+  </data>
+  <data name="OnlyOneGatewayAllowed" xml:space="preserve">
+    <value>Only One Gateway Allowed</value>
   </data>
   <data name="SpecialOfferError" xml:space="preserve">
     <value>Failed. Registration is not possible with reference number.</value>

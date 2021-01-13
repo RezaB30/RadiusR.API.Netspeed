@@ -35,6 +35,7 @@ namespace RadiusR.API.Netspeed
         WebServiceLogger SMSLogger = new WebServiceLogger("SMSInternal");
         WebServiceLogger Errorslogger = new WebServiceLogger("Errors");
         WebServiceLogger PaidLogger = new WebServiceLogger("Paid");
+        WebServiceLogger UnpaidLogger = new WebServiceLogger("Unpaid");
         public NetspeedServiceArrayListResponse GetProvinces(NetspeedServiceRequests request)
         {
             var password = ServiceSettings.Password(request.Username);
@@ -1046,7 +1047,9 @@ namespace RadiusR.API.Netspeed
                     //if (registeredCustomer != null)
                     //{
                     //    db.Customers.Add(registeredCustomer);
-                    //}
+                    //}                   
+                    db.SaveChanges();
+                    db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.AddSubscription(null, registeredCustomer.Subscriptions.FirstOrDefault().ID, registeredCustomer.ID, SystemLogInterface.MainSiteService, request.Username, registeredCustomer.Subscriptions.FirstOrDefault().SubscriberNo));
                     db.SaveChanges();
                     return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                     {
@@ -1139,9 +1142,7 @@ namespace RadiusR.API.Netspeed
                 {
                     return new NetspeedServicePayBillsResponse(passwordHash, request)
                     {
-
                         ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
-
                         PayBillsResponse = null,
                     };
                 }
@@ -1170,8 +1171,6 @@ namespace RadiusR.API.Netspeed
                     {
                         return new NetspeedServicePayBillsResponse(passwordHash, request)
                         {
-
-
                             ResponseMessage = CommonResponse.HasMoreSubscription(request.Culture),
                             PayBillsResponse = null,
                         };
@@ -1187,19 +1186,31 @@ namespace RadiusR.API.Netspeed
                             PayBillsResponse = null,
                         };
                     }
-                    var payResponse = RadiusR.DB.Utilities.Billing.BillPayment.PayBills(db, Bills, PaymentType.VirtualPos, BillPayment.AccountantType.Seller);
+                    var payResponse = RadiusR.DB.Utilities.Billing.BillPayment.PayBills(db, Bills, PaymentType.VirtualPos, BillPayment.AccountantType.Admin);
+                    db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.BillPayment(Bills.Select(b => b.ID).ToArray(), null, Bills.FirstOrDefault().SubscriptionID, SystemLogInterface.MainSiteService, request.Username, PaymentType.VirtualPos));
                     db.SaveChanges();
-                    PaidLogger.LogInfo(request.Username, $"Paid Successful. Bills : {string.Join("-", Bills.Select(b => b.ID.ToString()))}");
-                    //PaidLogger.Info($"Paid Successful. Bills : {string.Join("-", Bills.Select(b => b.ID.ToString()))}");
+                    if (payResponse == BillPayment.ResponseType.Success)
+                    {
+                        PaidLogger.LogInfo(request.Username, $"Paid Successful. Bills : {string.Join("-", Bills.Select(b => b.ID.ToString()))}");
+                        return new NetspeedServicePayBillsResponse(passwordHash, request)
+                        {
+                            PayBillsResponse = new PayBillsResponse()
+                            {
+                                PaymentResponse = CommonResponse.SuccessResponse(request.Culture).ErrorMessage
+                            },
+
+                            ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+
+                        };
+                    }
+                    UnpaidLogger.LogInfo(request.Username, $"Paid failed. Bills : {string.Join("-", Bills.Select(b => b.ID.ToString()))}");
                     return new NetspeedServicePayBillsResponse(passwordHash, request)
                     {
                         PayBillsResponse = new PayBillsResponse()
                         {
-                            PaymentResponse = payResponse.ToString()
+                            PaymentResponse = CommonResponse.PaymentResponse(request.Culture, payResponse).ErrorMessage
                         },
-
-                        ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-
+                        ResponseMessage = CommonResponse.FailedResponse(request.Culture),
                     };
                 }
             }
@@ -1208,10 +1219,8 @@ namespace RadiusR.API.Netspeed
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServicePayBillsResponse(passwordHash, request)
                 {
-
                     PayBillsResponse = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
-
                 };
             }
         }
