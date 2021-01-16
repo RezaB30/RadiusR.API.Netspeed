@@ -16,6 +16,7 @@ namespace RadiusR.API.Netspeed.Enums
         WrongOrInvalidBill = 6,
         AlreadyHaveCustomer = 7,
         SpecialOfferError = 8,
+        TariffNotFound = 9,
         InternalServerError = 199,
         Failed = 200
     }

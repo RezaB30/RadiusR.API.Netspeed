@@ -5,5 +5,8 @@
     <Setting Name="PasswordDuration" Type="System.TimeSpan" Scope="Application">
       <Value Profile="(Default)">00:30:00</Value>
     </Setting>
+    <Setting Name="CacheDuration" Type="System.TimeSpan" Scope="Application">
+      <Value Profile="(Default)">00:15:00</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -162,6 +162,9 @@
   <data name="Success" xml:space="preserve">
     <value>Başarılı</value>
   </data>
+  <data name="TariffNotFound" xml:space="preserve">
+    <value>Tarife bilgisi bulunamadı</value>
+  </data>
   <data name="WrongOrInvalidBill" xml:space="preserve">
     <value>Yanlış yada geçersiz faturalar bulunmakta</value>
   </data>

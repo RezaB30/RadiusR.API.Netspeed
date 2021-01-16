@@ -196,6 +196,15 @@ namespace RadiusR.API.Netspeed.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tariff is not found.
+        /// </summary>
+        public static string TariffNotFound {
+            get {
+                return ResourceManager.GetString("TariffNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to have wrong or invalid Bills.
         /// </summary>
         public static string WrongOrInvalidBill {

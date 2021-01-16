@@ -60,5 +60,8 @@ namespace RadiusR.API.Netspeed
         NetspeedServiceArrayListResponse GetIDCardTypes(NetspeedServiceRequests request);
         [OperationContract]
         string GetKeyFragment(string username);
+        [OperationContract]
+        NetspeedServiceExternalTariffResponse ExternalTariffList(NetspeedServiceExternalTariffRequest request);
+
     }
 }

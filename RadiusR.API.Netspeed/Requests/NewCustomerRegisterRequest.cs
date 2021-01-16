@@ -67,8 +67,8 @@ namespace RadiusR.API.Netspeed.Requests
     [DataContract]
     public class CustomerGeneralInfo
     {
-        [DataMember]
-        public int? CustomerType { get; set; }
+        //[DataMember]
+        //public int? CustomerType { get; set; }
         [DataMember]
         public string Email { get; set; }
         [DataMember]
@@ -186,14 +186,15 @@ namespace RadiusR.API.Netspeed.Requests
         public int? ServiceID { get; set; }
         [DataMember]
         public AddressInfo SetupAddress { get; set; }
-        [DataMember]
-        public int? BillingPeriod { get; set; }
+        //[DataMember]
+        //public int? BillingPeriod { get; set; }
         [DataMember]
         public ReferralDiscountInfo ReferralDiscountInfo { get; set; }
     }
     [DataContract]
     public class ReferralDiscountInfo
     {
+        [DataMember]
         public string ReferenceNo { get; set; }
         //public int? SpecialOfferID { get; set; }
     }

@@ -1,19 +1,30 @@
-﻿using System;
+﻿using RezaB.API.WebService.NLogExtentions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace RadiusR.API.Netspeed
 {
-    public static class ServiceSettings
+    public class ServiceSettings
     {
-        public static string Password(string username)
+        WebServiceLogger Errorslogger = new WebServiceLogger("Errors");
+        public string Password(string username)
         {
-            return "123456";
+            if (username != RadiusR.DB.CustomerWebsiteSettings.WebsiteServicesUsername)
+            {
+                Errorslogger.LogInfo(username, "username is not found");
+                // log wrong username
+                return "";
+            }
+            var password = RadiusR.DB.CustomerWebsiteSettings.WebsiteServicesPassword;
+
+            return password;
         }
-        public static TimeSpan Duration()
+        public TimeSpan Duration()
         {
-            return new TimeSpan(0, 2, 0);
+            //add CacheDuration
+            return Properties.Settings.Default.CacheDuration;
         }
     }
 }

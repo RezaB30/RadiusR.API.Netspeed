@@ -31,5 +31,14 @@ namespace RadiusR.API.Netspeed.Properties {
                 return ((global::System.TimeSpan)(this["PasswordDuration"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("00:15:00")]
+        public global::System.TimeSpan CacheDuration {
+            get {
+                return ((global::System.TimeSpan)(this["CacheDuration"]));
+            }
+        }
     }
 }

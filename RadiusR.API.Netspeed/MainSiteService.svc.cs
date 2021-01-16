@@ -38,11 +38,11 @@ namespace RadiusR.API.Netspeed
         WebServiceLogger UnpaidLogger = new WebServiceLogger("Unpaid");
         public NetspeedServiceArrayListResponse GetProvinces(NetspeedServiceRequests request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
@@ -81,14 +81,14 @@ namespace RadiusR.API.Netspeed
 
         public NetspeedServiceRegisterCustomerContactResponse RegisterCustomerContact(NetspeedServiceCustomerContactRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 using (var db = new RadiusR.DB.RadiusREntities())
                 {
                     //get password from db                
-                    var IsValid = request.HasValidHash(passwordHash, ServiceSettings.Duration());
+                    var IsValid = request.HasValidHash(passwordHash, new ServiceSettings().Duration());
                     if (IsValid)
                     {
                         if (request.CustomerContactParameters.RequestSubTypeID == null || request.CustomerContactParameters.RequestTypeID == null)
@@ -153,11 +153,11 @@ namespace RadiusR.API.Netspeed
 
         public NetspeedServiceServiceAvailabilityResponse ServiceAvailability(NetspeedServiceServiceAvailabilityRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceServiceAvailabilityResponse(passwordHash, request)
                     {
@@ -167,7 +167,7 @@ namespace RadiusR.API.Netspeed
                 }
                 using (var db = new RadiusR.DB.RadiusREntities())
                 {
-                    var domain = RadiusR.DB.DomainsCache.DomainsCache.GetDomainByID(1);
+                    var domain = RadiusR.DB.DomainsCache.DomainsCache.GetDomainByID(RadiusR.DB.CustomerWebsiteSettings.WebsiteServicesInfrastructureDomainID);
                     var client = new AvailabilityServiceClient(domain.TelekomCredential.XDSLWebServiceUsernameInt, domain.TelekomCredential.XDSLWebServicePassword);
                     var xdslTypeAdsl = AvailabilityServiceClient.XDSLType.ADSL;
                     var xdslTypeVdsl = AvailabilityServiceClient.XDSLType.VDSL;
@@ -198,53 +198,57 @@ namespace RadiusR.API.Netspeed
                     var address = addressServiceClient.GetAddressFromCode(Convert.ToInt64(request.ServiceAvailabilityParameters.bbk));
                     return new NetspeedServiceServiceAvailabilityResponse(passwordHash, request)
                     {
-
-
                         ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
                         ServiceAvailabilityResponse = new ServiceAvailabilityResponse()
                         {
                             address = address.InternalException == null ? address.Data.AddressText : "-",
-                            HasInfrastructureAdsl = HasInfrastructureAdsl,
-                            HasInfrastructureVdsl = HasInfrastructureVdsl,
-                            HasInfrastructureFiber = HasInfrastructureFiber,
-                            AdslDistance = availabAdsl.InternalException == null ? availabAdsl.Data.Description.Distance : null,
-                            VdslDistance = availabVdsl.InternalException == null ? availabVdsl.Data.Description.Distance : null,
-                            FiberDistance = availabFiber.InternalException == null ? availabFiber.Data.Description.Distance : null,
-                            AdslPortState = availabAdsl.InternalException == null ? RadiusR.Localization.Lists.PortState.ResourceManager.GetString(availabAdsl.Data.Description.PortState.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)) : RadiusR.Localization.Lists.PortState.ResourceManager.GetString(AvailabilityServiceClient.PortState.NotAvailable.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)),
-                            VdslPortState = availabVdsl.InternalException == null ? RadiusR.Localization.Lists.PortState.ResourceManager.GetString(availabVdsl.Data.Description.PortState.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)) : RadiusR.Localization.Lists.PortState.ResourceManager.GetString(AvailabilityServiceClient.PortState.NotAvailable.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)),
-                            FiberPortState = availabFiber.InternalException == null ? RadiusR.Localization.Lists.PortState.ResourceManager.GetString(availabFiber.Data.Description.PortState.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)) : RadiusR.Localization.Lists.PortState.ResourceManager.GetString(AvailabilityServiceClient.PortState.NotAvailable.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)),
-                            AdslSpeed = availabAdsl.InternalException == null ? availabAdsl.Data.Description.DSLMaxSpeed : null,
-                            VdslSpeed = availabVdsl.InternalException == null ? availabVdsl.Data.Description.DSLMaxSpeed : null,
-                            FiberSpeed = availabFiber.InternalException == null ? availabFiber.Data.Description.DSLMaxSpeed : null,
-                            AdslSVUID = availabAdsl.InternalException == null ? availabAdsl.Data.Description.SVUID : "-",
-                            VdslSVUID = availabVdsl.InternalException == null ? availabVdsl.Data.Description.SVUID : "-",
-                            FiberSVUID = availabFiber.InternalException == null ? availabFiber.Data.Description.SVUID : "-",
+                            ADSL = new ServiceAvailabilityResponse.ADSLInfo()
+                            {
+                                HasInfrastructureAdsl = HasInfrastructureAdsl,
+                                AdslDistance = availabAdsl.InternalException == null ? availabAdsl.Data.Description.Distance : null,
+                                AdslPortState = availabAdsl.InternalException == null ? RadiusR.Localization.Lists.PortState.ResourceManager.GetString(availabAdsl.Data.Description.PortState.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)) : RadiusR.Localization.Lists.PortState.ResourceManager.GetString(AvailabilityServiceClient.PortState.NotAvailable.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)),
+                                AdslSpeed = availabAdsl.InternalException == null ? availabAdsl.Data.Description.DSLMaxSpeed : null,
+                                AdslSVUID = availabAdsl.InternalException == null ? availabAdsl.Data.Description.SVUID : "-",
+                            },
+                            VDSL = new ServiceAvailabilityResponse.VDSLInfo()
+                            {
+                                HasInfrastructureVdsl = HasInfrastructureVdsl,
+                                VdslDistance = availabVdsl.InternalException == null ? availabVdsl.Data.Description.Distance : null,
+                                VdslPortState = availabVdsl.InternalException == null ? RadiusR.Localization.Lists.PortState.ResourceManager.GetString(availabVdsl.Data.Description.PortState.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)) : RadiusR.Localization.Lists.PortState.ResourceManager.GetString(AvailabilityServiceClient.PortState.NotAvailable.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)),
+                                VdslSpeed = availabVdsl.InternalException == null ? availabVdsl.Data.Description.DSLMaxSpeed : null,
+                                VdslSVUID = availabVdsl.InternalException == null ? availabVdsl.Data.Description.SVUID : "-",
+                            },
+                            FIBER = new ServiceAvailabilityResponse.FIBERInfo()
+                            {
+                                HasInfrastructureFiber = HasInfrastructureFiber,
+                                FiberDistance = availabFiber.InternalException == null ? availabFiber.Data.Description.Distance : null,
+                                FiberPortState = availabFiber.InternalException == null ? RadiusR.Localization.Lists.PortState.ResourceManager.GetString(availabFiber.Data.Description.PortState.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)) : RadiusR.Localization.Lists.PortState.ResourceManager.GetString(AvailabilityServiceClient.PortState.NotAvailable.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)),
+                                FiberSpeed = availabFiber.InternalException == null ? availabFiber.Data.Description.DSLMaxSpeed : null,
+                                FiberSVUID = availabFiber.InternalException == null ? availabFiber.Data.Description.SVUID : "-",
+                            },
                             BBK = request.ServiceAvailabilityParameters.bbk
                         }
                     };
                 }
-
             }
             catch (Exception ex)
             {
                 Errorslogger.LogException(request.Username, ex);
                 return new NetspeedServiceServiceAvailabilityResponse(passwordHash, request)
                 {
-
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
                     ServiceAvailabilityResponse = null,
-
                 };
             }
         }
 
         public NetspeedServiceArrayListResponse GetProvinceDistricts(NetspeedServiceArrayListRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
@@ -290,11 +294,11 @@ namespace RadiusR.API.Netspeed
 
         public NetspeedServiceArrayListResponse GetDistrictRuralRegions(NetspeedServiceArrayListRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
@@ -340,11 +344,11 @@ namespace RadiusR.API.Netspeed
 
         public NetspeedServiceArrayListResponse GetRuralRegionNeighbourhoods(NetspeedServiceArrayListRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
@@ -392,11 +396,11 @@ namespace RadiusR.API.Netspeed
 
         public NetspeedServiceArrayListResponse GetNeighbourhoodStreets(NetspeedServiceArrayListRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
@@ -444,11 +448,11 @@ namespace RadiusR.API.Netspeed
 
         public NetspeedServiceArrayListResponse GetStreetBuildings(NetspeedServiceArrayListRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
@@ -495,11 +499,11 @@ namespace RadiusR.API.Netspeed
         }
         public NetspeedServiceArrayListResponse GetBuildingApartments(NetspeedServiceArrayListRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
@@ -546,11 +550,11 @@ namespace RadiusR.API.Netspeed
         }
         public NetspeedServiceAddressDetailsResponse GetApartmentAddress(NetspeedServiceAddressDetailsRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceAddressDetailsResponse(passwordHash, request)
                     {
@@ -611,13 +615,13 @@ namespace RadiusR.API.Netspeed
 
         public NetspeedServiceSubscriberGetBillsResponse GetBills(NetspeedServiceSubscriberGetBillsRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
                 using (var db = new RadiusR.DB.RadiusREntities())
                 {
-                    if (request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                    if (request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                     {
                         if (request.GetBillParameters.PhoneNo.StartsWith("0"))
                         {
@@ -739,11 +743,11 @@ namespace RadiusR.API.Netspeed
 
         public NetspeedServicePaymentVPOSResponse SubscriberPaymentVPOS(NetspeedServicePaymentVPOSRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
                     {
@@ -823,11 +827,11 @@ namespace RadiusR.API.Netspeed
 
         public NetspeedServiceNewCustomerRegisterResponse NewCustomerRegister(NetspeedServiceNewCustomerRegisterRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                     {
@@ -848,6 +852,16 @@ namespace RadiusR.API.Netspeed
                             ResponseMessage = CommonResponse.SpecialOfferError(request.Culture)
                         };
                     }
+                    var tariff = db.Services.Find(request.CustomerRegisterParameters.SubscriptionInfo.ServiceID);
+                    if (tariff == null)
+                    {
+                        return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+                        {
+                            ResponseMessage = CommonResponse.TariffNotFound(request.Culture),
+                            NewCustomerRegisterResponse = null
+                        };
+                    }
+                    var billingPeriod = tariff.GetBestBillingPeriod(DateTime.Now.Day);
                     var currentSpecialOfferId = specialOfferId.FirstOrDefault().ID;
                     var registeredCustomer = new Customer();
                     var register = request.CustomerRegisterParameters;
@@ -932,7 +946,7 @@ namespace RadiusR.API.Netspeed
                             },
                             ContactPhoneNo = register.CustomerGeneralInfo.ContactPhoneNo,
                             Culture = register.CustomerGeneralInfo.Culture,
-                            CustomerType = (CustomerType?)register.CustomerGeneralInfo.CustomerType,
+                            CustomerType = CustomerType.Individual,
                             Email = register.CustomerGeneralInfo.Email,
                             OtherPhoneNos = register.CustomerGeneralInfo.OtherPhoneNos == null ? null : register.CustomerGeneralInfo.OtherPhoneNos.Select(p => new CustomerRegistrationInfo.PhoneNoListItem()
                             {
@@ -1011,7 +1025,7 @@ namespace RadiusR.API.Netspeed
                                 StreetID = register.SubscriptionInfo.SetupAddress.StreetID,
                                 StreetName = register.SubscriptionInfo.SetupAddress.StreetName
                             },
-                            BillingPeriod = register.SubscriptionInfo.BillingPeriod,
+                            BillingPeriod = billingPeriod,
                             ReferralDiscount = new CustomerRegistrationInfo.ReferralDiscountInfo()
                             {
                                 ReferenceNo = request.CustomerRegisterParameters.SubscriptionInfo.ReferralDiscountInfo.ReferenceNo,
@@ -1024,9 +1038,10 @@ namespace RadiusR.API.Netspeed
 
                     if (result != null)
                     {
-                        foreach (var item in result)
+                        var dic = result.ToDictionary(x => x.Key, x => x.ToArray());
+                        foreach (var item in dic)
                         {
-                            valuePairs.Add(item.Key, item.FirstOrDefault());
+                            valuePairs.Add(item.Key, string.Join("-", item.Value));
                         }
                         return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                         {
@@ -1054,9 +1069,7 @@ namespace RadiusR.API.Netspeed
                     return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                     {
                         NewCustomerRegisterResponse = valuePairs,
-
                         ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-
                     };
                 }
             }
@@ -1086,7 +1099,7 @@ namespace RadiusR.API.Netspeed
         //    var passwordHash = HashUtilities.GetHexString<SHA1>(password);
         //    try
         //    {
-        //        if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+        //        if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
         //        {
         //            return CommonResponse<Dictionary<string, string>, SHA1>.UnauthorizedResponse(passwordHash, request);
         //        }
@@ -1134,11 +1147,11 @@ namespace RadiusR.API.Netspeed
 
         public NetspeedServicePayBillsResponse PayBills(NetspeedServicePayBillsRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServicePayBillsResponse(passwordHash, request)
                     {
@@ -1228,11 +1241,11 @@ namespace RadiusR.API.Netspeed
         readonly Random random = new Random();
         public NetspeedServiceSendGenericSMSResponse SendGenericSMS(NetspeedServiceSendGenericSMSRequest request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceSendGenericSMSResponse(passwordHash, request)
                     {
@@ -1273,11 +1286,11 @@ namespace RadiusR.API.Netspeed
         }
         //public NetspeedServiceRegisterSMSValidationResponse RegisterSMSValidation(NetspeedServiceRegisterSMSValidationRequest request)
         //{
-        //    var password = ServiceSettings.Password(request.Username);
+        //    var password = new ServiceSettings().Password(request.Username);
         //    var passwordHash = HashUtilities.GetHexString<SHA1>(password);
         //    try
         //    {
-        //        if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+        //        if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
         //        {
         //            return new NetspeedServiceRegisterSMSValidationResponse(passwordHash, request)
         //            {
@@ -1357,11 +1370,11 @@ namespace RadiusR.API.Netspeed
         #endregion
         public NetspeedServiceArrayListResponse GetNationalities(NetspeedServiceRequests request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
@@ -1399,11 +1412,11 @@ namespace RadiusR.API.Netspeed
 
         public NetspeedServiceArrayListResponse GetSexes(NetspeedServiceRequests request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
@@ -1441,11 +1454,11 @@ namespace RadiusR.API.Netspeed
 
         public NetspeedServiceArrayListResponse GetProfessions(NetspeedServiceRequests request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
@@ -1483,11 +1496,11 @@ namespace RadiusR.API.Netspeed
 
         public NetspeedServiceArrayListResponse GetIDCardTypes(NetspeedServiceRequests request)
         {
-            var password = ServiceSettings.Password(request.Username);
+            var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                if (!request.HasValidHash(passwordHash, ServiceSettings.Duration()))
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
                     {
@@ -1524,8 +1537,50 @@ namespace RadiusR.API.Netspeed
         }
         public string GetKeyFragment(string username)
         {
-            return KeyManager.GenerateKeyFragment(username, ServiceSettings.Duration());
+            return KeyManager.GenerateKeyFragment(username, new ServiceSettings().Duration());
         }
+        public NetspeedServiceExternalTariffResponse ExternalTariffList(NetspeedServiceExternalTariffRequest request)
+        {
+            var password = new ServiceSettings().Password(request.Username);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
+            try
+            {
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
+                {
+                    return new NetspeedServiceExternalTariffResponse(passwordHash, request)
+                    {
+                        ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                        ExternalTariffList = null
+                    };
+                }
+                using (var db = new RadiusREntities())
+                {
+                    var tariffs = db.ExternalTariffs.Select(t => new ExternalTariffResponse()
+                    {
+                        DisplayName = t.DisplayName,
+                        DomainID = t.DomainID,
+                        HasFiber = t.HasFiber,
+                        HasXDSL = t.HasXDSL,
+                        TariffID = t.TariffID
+                    }).ToArray();
+                    return new NetspeedServiceExternalTariffResponse(passwordHash, request)
+                    {
+                        ExternalTariffList = tariffs,
+                        ResponseMessage = CommonResponse.SuccessResponse(request.Culture)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Errorslogger.LogException(request.Username, ex);
+                return new NetspeedServiceExternalTariffResponse(passwordHash, request)
+                {
 
+                    ExternalTariffList = null,
+                    ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
+
+                };
+            }
+        }
     }
 }

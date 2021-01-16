@@ -108,6 +108,14 @@ namespace RadiusR.API.Netspeed
                 ErrorMessage = new RezaB.Data.Localization.LocalizedList<BillPayment.ResponseType, ErrorMessages>().GetDisplayText((int)responseType, CreateCulture(culture))
             };
         }
+        public static ServiceResponse TariffNotFound(string culture)
+        {
+            return new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.TariffNotFound,
+                ErrorMessage = new RezaB.Data.Localization.LocalizedList<ErrorCodes, ErrorMessages>().GetDisplayText((int)ErrorCodes.TariffNotFound, CreateCulture(culture))
+            };
+        }
         private static CultureInfo CreateCulture(string cultureName)
         {
             var currentCulture = CultureInfo.InvariantCulture;
