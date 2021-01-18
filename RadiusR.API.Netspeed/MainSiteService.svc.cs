@@ -241,7 +241,6 @@ namespace RadiusR.API.Netspeed
                 };
             }
         }
-
         public NetspeedServiceArrayListResponse GetProvinceDistricts(NetspeedServiceArrayListRequest request)
         {
             var password = new ServiceSettings().Password(request.Username);
@@ -1561,8 +1560,15 @@ namespace RadiusR.API.Netspeed
                         DomainID = t.DomainID,
                         HasFiber = t.HasFiber,
                         HasXDSL = t.HasXDSL,
-                        TariffID = t.TariffID
+                        TariffID = t.TariffID,
+                        Price = t.Service.Price,
+                        Speed = t.Service.RateLimit
                     }).ToArray();
+                    foreach (var item in tariffs)
+                    {
+                        var speedRate = RezaB.Data.Formating.RateLimitParser.ParseString(item.Speed);
+                        item.Speed = $"{speedRate.DownloadRate} {speedRate.DownloadRateSuffix}";
+                    }
                     return new NetspeedServiceExternalTariffResponse(passwordHash, request)
                     {
                         ExternalTariffList = tariffs,

@@ -21,6 +21,11 @@ namespace RadiusR.API.Netspeed.Responses
         public bool HasXDSL { get; set; }
         [DataMember]
         public bool HasFiber { get; set; }
+        [DataMember]
+        public decimal Price { get; set; }
+        [DataMember]
+        public string Speed { get; set; }
+
     }
     [DataContract]
     public partial class NetspeedServiceExternalTariffResponse : BaseResponse<IEnumerable<ExternalTariffResponse>, SHA1>
