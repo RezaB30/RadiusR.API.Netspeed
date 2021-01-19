@@ -181,8 +181,6 @@ namespace RadiusR.API.Netspeed.Requests
     public class SubscriptionRegistrationInfo
     {
         [DataMember]
-        public int? DomainID { get; set; }
-        [DataMember]
         public int? ServiceID { get; set; }
         [DataMember]
         public AddressInfo SetupAddress { get; set; }

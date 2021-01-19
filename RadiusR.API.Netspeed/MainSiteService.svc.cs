@@ -851,8 +851,8 @@ namespace RadiusR.API.Netspeed
                             ResponseMessage = CommonResponse.SpecialOfferError(request.Culture)
                         };
                     }
-                    var tariff = db.Services.Find(request.CustomerRegisterParameters.SubscriptionInfo.ServiceID);
-                    if (tariff == null)
+                    var externalTariff = db.ExternalTariffs.GetActiveExternalTariffs().FirstOrDefault(ext => ext.TariffID == request.CustomerRegisterParameters.SubscriptionInfo.ServiceID);
+                    if (externalTariff == null)
                     {
                         return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                         {
@@ -860,7 +860,7 @@ namespace RadiusR.API.Netspeed
                             NewCustomerRegisterResponse = null
                         };
                     }
-                    var billingPeriod = tariff.GetBestBillingPeriod(DateTime.Now.Day);
+                    var billingPeriod = externalTariff.Service.GetBestBillingPeriod(DateTime.Now.Day);
                     var currentSpecialOfferId = specialOfferId.FirstOrDefault().ID;
                     var registeredCustomer = new Customer();
                     var register = request.CustomerRegisterParameters;
@@ -1002,8 +1002,8 @@ namespace RadiusR.API.Netspeed
                         },
                         SubscriptionInfo = register.SubscriptionInfo == null ? null : new CustomerRegistrationInfo.SubscriptionRegistrationInfo()
                         {
-                            DomainID = register.SubscriptionInfo.DomainID,
-                            ServiceID = register.SubscriptionInfo.ServiceID,
+                            DomainID = externalTariff.DomainID,
+                            ServiceID = externalTariff.TariffID,
                             SetupAddress = new CustomerRegistrationInfo.AddressInfo()
                             {
                                 AddressNo = register.SubscriptionInfo.SetupAddress.AddressNo,
@@ -1025,7 +1025,7 @@ namespace RadiusR.API.Netspeed
                                 StreetName = register.SubscriptionInfo.SetupAddress.StreetName
                             },
                             BillingPeriod = billingPeriod,
-                            ReferralDiscount = new CustomerRegistrationInfo.ReferralDiscountInfo()
+                            ReferralDiscount = string.IsNullOrEmpty(request.CustomerRegisterParameters.SubscriptionInfo.ReferralDiscountInfo.ReferenceNo) ? null : new CustomerRegistrationInfo.ReferralDiscountInfo()
                             {
                                 ReferenceNo = request.CustomerRegisterParameters.SubscriptionInfo.ReferralDiscountInfo.ReferenceNo,
                                 SpecialOfferID = currentSpecialOfferId
@@ -1557,7 +1557,6 @@ namespace RadiusR.API.Netspeed
                     var tariffs = db.ExternalTariffs.Select(t => new ExternalTariffResponse()
                     {
                         DisplayName = t.DisplayName,
-                        DomainID = t.DomainID,
                         HasFiber = t.HasFiber,
                         HasXDSL = t.HasXDSL,
                         TariffID = t.TariffID,

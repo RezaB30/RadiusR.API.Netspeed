@@ -14,8 +14,6 @@ namespace RadiusR.API.Netspeed.Responses
         [DataMember]
         public int TariffID { get; set; }
         [DataMember]
-        public int DomainID { get; set; }
-        [DataMember]
         public string DisplayName { get; set; }
         [DataMember]
         public bool HasXDSL { get; set; }
