@@ -773,9 +773,7 @@ namespace RadiusR.API.Netspeed
                     {
                         return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
                         {
-
                             ResponseMessage = CommonResponse.WrongOrInvalidBills(request.Culture),
-
                             PaymentVPOSResponse = null,
                         };
                     }
@@ -784,8 +782,6 @@ namespace RadiusR.API.Netspeed
                     {
                         return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
                         {
-
-
                             ResponseMessage = CommonResponse.HasMoreSubscription(request.Culture),
                             PaymentVPOSResponse = null,
                         };
@@ -805,7 +801,6 @@ namespace RadiusR.API.Netspeed
                         {
                             HtmlForm = htmlForm,
                         },
-
                         ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
 
                     };
