@@ -91,24 +91,14 @@ namespace RadiusR.API.Netspeed
                     var IsValid = request.HasValidHash(passwordHash, new ServiceSettings().Duration());
                     if (IsValid)
                     {
-                        if (request.CustomerContactParameters.RequestSubTypeID == null || request.CustomerContactParameters.RequestTypeID == null)
-                        {
-                            return new NetspeedServiceRegisterCustomerContactResponse(passwordHash, request)
-                            {
-
-
-                                ResponseMessage = CommonResponse.NullObjectException(request.Culture),
-                                RegisterCustomerContactResponse = null
-                            };
-                        }
                         var description = $"{request.CustomerContactParameters.FullName}{Environment.NewLine}{request.CustomerContactParameters.PhoneNo}";
                         db.SupportRequests.Add(new RadiusR.DB.SupportRequest()
                         {
                             Date = DateTime.Now,
                             IsVisibleToCustomer = false,
                             StateID = (short)RadiusR.DB.Enums.SupportRequests.SupportRequestStateID.InProgress,
-                            TypeID = request.CustomerContactParameters.RequestTypeID.Value,
-                            SubTypeID = request.CustomerContactParameters.RequestSubTypeID.Value,
+                            TypeID = Properties.Settings.Default.SupportRequestTypeId,
+                            SubTypeID = Properties.Settings.Default.SupportRequestSubTypeId,
                             SupportPin = RadiusR.DB.RandomCode.CodeGenerator.GenerateSupportRequestPIN(),
                             SubscriptionID = null,
                             SupportRequestProgresses =
@@ -1278,6 +1268,76 @@ namespace RadiusR.API.Netspeed
                 };
             }
         }
+        public NetspeedServiceIDCardValidationResponse IDCardValidation(NetspeedServiceIDCardValidationRequest request)
+        {
+            var password = new ServiceSettings().Password(request.Username);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
+            try
+            {
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
+                {
+                    return new NetspeedServiceIDCardValidationResponse(passwordHash, request)
+                    {
+
+                        IDCardValidationResponse = false,
+                        ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                    };
+                }
+                var validation = new RezaB.API.TCKValidation.TCKValidationClient();
+                var BirthDate = RezaB.API.WebService.DataTypes.ServiceTypeConverter.ParseDate(request.IDCardValidationRequest.BirthDate);
+                if (!BirthDate.HasValue)
+                {
+                    BirthDate = DateTime.Now;
+                }
+                if (request.IDCardValidationRequest.IDCardType == (int)RadiusR.DB.Enums.IDCardTypes.TCIDCardWithChip)
+                {
+                    var result = validation.ValidateNewTCK(
+                        request.IDCardValidationRequest.TCKNo,
+                        request.IDCardValidationRequest.FirstName,
+                        request.IDCardValidationRequest.LastName,
+                        BirthDate.Value,
+                        request.IDCardValidationRequest.RegistirationNo);
+                    return new NetspeedServiceIDCardValidationResponse(passwordHash, request)
+                    {
+                        IDCardValidationResponse = result,
+                        ResponseMessage = CommonResponse.SuccessResponse(request.Culture)
+                    };
+                }
+                else
+                {
+                    if (request.IDCardValidationRequest.RegistirationNo.Length != 9)
+                    {
+                        return new NetspeedServiceIDCardValidationResponse(passwordHash, request)
+                        {
+                            IDCardValidationResponse = false,
+                            ResponseMessage = CommonResponse.FailedResponse(request.Culture, Localization.ErrorMessages.ResourceManager.GetString("InvalidSerialNo", CultureInfo.CreateSpecificCulture(request.Culture)))
+                        };
+                    }
+                    var serial = request.IDCardValidationRequest.RegistirationNo.Substring(0, 3);
+                    var serialNumber = request.IDCardValidationRequest.RegistirationNo.Substring(3, request.IDCardValidationRequest.RegistirationNo.Length - 3);
+                    var result = validation.ValidateOldTCK(
+                        request.IDCardValidationRequest.TCKNo,
+                        request.IDCardValidationRequest.FirstName,
+                        request.IDCardValidationRequest.LastName,
+                        BirthDate.Value, serialNumber, serial);
+                    return new NetspeedServiceIDCardValidationResponse(passwordHash, request)
+                    {
+                        IDCardValidationResponse = result,
+                        ResponseMessage = CommonResponse.SuccessResponse(request.Culture)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Errorslogger.LogException(request.Username, ex);
+                return new NetspeedServiceIDCardValidationResponse(passwordHash, request)
+                {
+                    IDCardValidationResponse = false,
+                    ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
+
+                };
+            }
+        }
         //public NetspeedServiceRegisterSMSValidationResponse RegisterSMSValidation(NetspeedServiceRegisterSMSValidationRequest request)
         //{
         //    var password = new ServiceSettings().Password(request.Username);
@@ -1510,7 +1570,7 @@ namespace RadiusR.API.Netspeed
 
 
                     ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    ValueNamePairList = list.Select(l => new ValueNamePair()
+                    ValueNamePairList = list.Take(2).Select(l => new ValueNamePair()
                     {
                         Code = l.Key,
                         Name = l.Value
@@ -1579,6 +1639,46 @@ namespace RadiusR.API.Netspeed
                     ExternalTariffList = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
 
+                };
+            }
+        }
+        public NetspeedServiceGenericAppSettingsResponse GenericAppSettings(NetspeedServiceGenericAppSettingsRequest request)
+        {
+            var password = new ServiceSettings().Password(request.Username);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
+            try
+            {
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
+                {
+                    //Errorslogger.Error($"unauthorize error. User : {request.Username}");
+                    Errorslogger.LogException(request.Username, new Exception("unauthorize error"));
+                    return new NetspeedServiceGenericAppSettingsResponse(passwordHash, request)
+                    {
+                        GenericAppSettings = null,
+                        ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                    };
+                }
+                var recaptchaSiteKey = CustomerWebsiteSettings.CustomerWebsiteRecaptchaClientKey;
+                var recaptchaSecretKey = CustomerWebsiteSettings.CustomerWebsiteRecaptchaServerKey;
+                var useGoogleRecaptcha = CustomerWebsiteSettings.CustomerWebsiteUseGoogleRecaptcha;
+                return new NetspeedServiceGenericAppSettingsResponse(passwordHash, request)
+                {
+                    GenericAppSettings = new GenericAppSettingsResponse()
+                    {
+                        RecaptchaClientKey = recaptchaSiteKey,
+                        RecaptchaServerKey = recaptchaSecretKey,
+                        UseGoogleRecaptcha = useGoogleRecaptcha
+                    },
+                    ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                };
+            }
+            catch (Exception ex)
+            {
+                Errorslogger.LogException(request.Username, ex);
+                return new NetspeedServiceGenericAppSettingsResponse(passwordHash, request)
+                {
+                    ResponseMessage = CommonResponse.InternalException(request.Culture),
+                    GenericAppSettings = null,
                 };
             }
         }

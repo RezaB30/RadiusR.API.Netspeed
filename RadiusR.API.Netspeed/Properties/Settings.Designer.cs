@@ -40,5 +40,23 @@ namespace RadiusR.API.Netspeed.Properties {
                 return ((global::System.TimeSpan)(this["CacheDuration"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1022")]
+        public int SupportRequestTypeId {
+            get {
+                return ((int)(this["SupportRequestTypeId"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1048")]
+        public int SupportRequestSubTypeId {
+            get {
+                return ((int)(this["SupportRequestSubTypeId"]));
+            }
+        }
     }
 }

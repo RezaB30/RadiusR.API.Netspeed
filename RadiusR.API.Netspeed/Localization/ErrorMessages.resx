@@ -144,6 +144,9 @@
   <data name="InvalidPaymentAmount" xml:space="preserve">
     <value>Invalid Payment Amount</value>
   </data>
+  <data name="InvalidSerialNo" xml:space="preserve">
+    <value>Invalid serial no</value>
+  </data>
   <data name="NotEnoughCredit" xml:space="preserve">
     <value>Not Enough Credit</value>
   </data>

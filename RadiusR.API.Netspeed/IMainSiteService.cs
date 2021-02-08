@@ -62,6 +62,9 @@ namespace RadiusR.API.Netspeed
         string GetKeyFragment(string username);
         [OperationContract]
         NetspeedServiceExternalTariffResponse ExternalTariffList(NetspeedServiceExternalTariffRequest request);
-
+        [OperationContract]
+        NetspeedServiceGenericAppSettingsResponse GenericAppSettings(NetspeedServiceGenericAppSettingsRequest request);
+        [OperationContract]
+        NetspeedServiceIDCardValidationResponse IDCardValidation(NetspeedServiceIDCardValidationRequest request);
     }
 }

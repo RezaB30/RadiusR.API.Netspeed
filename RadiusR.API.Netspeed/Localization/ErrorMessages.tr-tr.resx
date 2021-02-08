@@ -144,6 +144,9 @@
   <data name="InvalidPaymentAmount" xml:space="preserve">
     <value>Geçersiz ödeme tutaru</value>
   </data>
+  <data name="InvalidSerialNo" xml:space="preserve">
+    <value>Geçersiz seri numarası</value>
+  </data>
   <data name="NotEnoughCredit" xml:space="preserve">
     <value>Yetersiz bakiye</value>
   </data>

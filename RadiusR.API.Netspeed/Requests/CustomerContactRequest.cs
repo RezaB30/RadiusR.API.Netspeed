@@ -16,10 +16,6 @@ namespace RadiusR.API.Netspeed.Requests
     public class CustomerContactRequest
     {
         [DataMember]
-        public int? RequestTypeID { get; set; }
-        [DataMember]
-        public int? RequestSubTypeID { get; set; }
-        [DataMember]
         public string PhoneNo { get; set; }
         [DataMember]
         public string FullName { get; set; }

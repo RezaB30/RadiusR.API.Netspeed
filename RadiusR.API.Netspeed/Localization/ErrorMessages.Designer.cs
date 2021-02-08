@@ -142,6 +142,15 @@ namespace RadiusR.API.Netspeed.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid serial no.
+        /// </summary>
+        public static string InvalidSerialNo {
+            get {
+                return ResourceManager.GetString("InvalidSerialNo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Not Enough Credit.
         /// </summary>
         public static string NotEnoughCredit {

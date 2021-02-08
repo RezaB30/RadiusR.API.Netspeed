@@ -8,5 +8,11 @@
     <Setting Name="CacheDuration" Type="System.TimeSpan" Scope="Application">
       <Value Profile="(Default)">00:15:00</Value>
     </Setting>
+    <Setting Name="SupportRequestTypeId" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">1022</Value>
+    </Setting>
+    <Setting Name="SupportRequestSubTypeId" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">1048</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
