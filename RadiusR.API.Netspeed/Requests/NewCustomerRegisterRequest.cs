@@ -60,9 +60,9 @@ namespace RadiusR.API.Netspeed.Requests
         [DataMember]
         public string PlaceOfIssue { get; set; }
         [DataMember]
-        public DateTime? DateOfIssue { get; set; }
+        public string DateOfIssue { get; set; }
         [DataMember]
-        public DateTime? BirthDate { get; set; }
+        public string BirthDate { get; set; }
     }
     [DataContract]
     public class CustomerGeneralInfo

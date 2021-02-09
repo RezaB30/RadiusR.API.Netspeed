@@ -939,9 +939,9 @@ namespace RadiusR.API.Netspeed
                         },
                         IDCard = register.IDCardInfo == null ? null : new CustomerRegistrationInfo.IDCardInfo()
                         {
-                            BirthDate = register.IDCardInfo.BirthDate,
+                            BirthDate = RezaB.API.WebService.DataTypes.ServiceTypeConverter.ParseDate(register.IDCardInfo.BirthDate),
                             CardType = (IDCardTypes?)register.IDCardInfo.CardType,
-                            DateOfIssue = register.IDCardInfo.DateOfIssue,
+                            DateOfIssue = RezaB.API.WebService.DataTypes.ServiceTypeConverter.ParseDate(register.IDCardInfo.DateOfIssue),
                             District = register.IDCardInfo.District,
                             FirstName = register.IDCardInfo.FirstName,
                             LastName = register.IDCardInfo.LastName,
@@ -1274,6 +1274,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                Errorslogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceIDCardValidationResponse(passwordHash, request)
