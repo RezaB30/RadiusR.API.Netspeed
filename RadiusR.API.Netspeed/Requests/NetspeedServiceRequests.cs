@@ -15,10 +15,10 @@ namespace RadiusR.API.Netspeed.Requests
     
 
     [DataContract]
-    public partial class NetspeedServicePayBillsRequest : BaseRequest<IEnumerable<long>, SHA1>
+    public partial class NetspeedServicePayBillsRequest : BaseRequest<long[], SHA1>
     {
         [DataMember]
-        public IEnumerable<long> PayBillsParameters
+        public long[] PayBillsParameters
         {
             get { return Data; }
             set { Data = value; }

@@ -12,7 +12,7 @@ namespace RadiusR.API.Netspeed.Requests
     public class VPOSLoggerRequest
     {
         [DataMember]
-        public IEnumerable<long> BillIds { get; set; }
+        public long[] BillIds { get; set; }
         [DataMember]
         public Dictionary<string, string> FormKeys { get; set; }
     }

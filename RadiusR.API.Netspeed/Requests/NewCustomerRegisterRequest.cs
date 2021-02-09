@@ -76,7 +76,7 @@ namespace RadiusR.API.Netspeed.Requests
         [DataMember]
         public string ContactPhoneNo { get; set; }
         [DataMember]
-        public IEnumerable<PhoneNoListItem> OtherPhoneNos { get; set; }
+        public PhoneNoListItem[] OtherPhoneNos { get; set; }
         [DataMember]
         public AddressInfo BillingAddress { get; set; }
     }

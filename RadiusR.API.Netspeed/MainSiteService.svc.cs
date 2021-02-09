@@ -36,6 +36,7 @@ namespace RadiusR.API.Netspeed
         WebServiceLogger Errorslogger = new WebServiceLogger("Errors");
         WebServiceLogger PaidLogger = new WebServiceLogger("Paid");
         WebServiceLogger UnpaidLogger = new WebServiceLogger("Unpaid");
+        WebServiceLogger InComingLogger = new WebServiceLogger("InComingInfo");
         public NetspeedServiceArrayListResponse GetProvinces(NetspeedServiceRequests request)
         {
             var password = new ServiceSettings().Password(request.Username);
@@ -85,6 +86,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 using (var db = new RadiusR.DB.RadiusREntities())
                 {
                     //get password from db                
@@ -147,6 +149,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceServiceAvailabilityResponse(passwordHash, request)
@@ -543,6 +546,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceAddressDetailsResponse(passwordHash, request)
@@ -608,6 +612,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 using (var db = new RadiusR.DB.RadiusREntities())
                 {
                     if (request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
@@ -736,6 +741,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServicePaymentVPOSResponse(passwordHash, request)
@@ -815,6 +821,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
@@ -1135,6 +1142,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServicePayBillsResponse(passwordHash, request)
@@ -1225,10 +1233,12 @@ namespace RadiusR.API.Netspeed
         readonly Random random = new Random();
         public NetspeedServiceSendGenericSMSResponse SendGenericSMS(NetspeedServiceSendGenericSMSRequest request)
         {
+            InComingLogger.LogIncomingMessage(request);
             var password = new ServiceSettings().Password(request.Username);
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceSendGenericSMSResponse(passwordHash, request)
@@ -1264,7 +1274,6 @@ namespace RadiusR.API.Netspeed
                 {
                     SMSCode = null,
                     ResponseMessage = CommonResponse.InternalException(request.Culture, ex),
-
                 };
             }
         }
@@ -1274,7 +1283,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
-                Errorslogger.LogIncomingMessage(request);
+                InComingLogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceIDCardValidationResponse(passwordHash, request)
@@ -1429,6 +1438,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
@@ -1471,6 +1481,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
@@ -1513,6 +1524,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
@@ -1555,6 +1567,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceArrayListResponse(passwordHash, request)
@@ -1600,6 +1613,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     return new NetspeedServiceExternalTariffResponse(passwordHash, request)
@@ -1649,6 +1663,7 @@ namespace RadiusR.API.Netspeed
             var passwordHash = HashUtilities.GetHexString<SHA1>(password);
             try
             {
+                InComingLogger.LogIncomingMessage(request);
                 if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
                 {
                     //Errorslogger.Error($"unauthorize error. User : {request.Username}");
