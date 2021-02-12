@@ -1024,6 +1024,7 @@ namespace RadiusR.API.Netspeed
                             }
                         },
                     };
+
                     var result = RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration.Registration.RegisterSubscriptionWithNewCustomer(db, registrationInfo, out registeredCustomer);
                     Dictionary<string, string> valuePairs = new Dictionary<string, string>();
 
@@ -1050,10 +1051,7 @@ namespace RadiusR.API.Netspeed
                             NewCustomerRegisterResponse = null
                         };
                     }
-                    //if (registeredCustomer != null)
-                    //{
-                    //    db.Customers.Add(registeredCustomer);
-                    //}                   
+                    db.Customers.Add(registeredCustomer);
                     db.SaveChanges();
                     db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.AddSubscription(null, registeredCustomer.Subscriptions.FirstOrDefault().ID, registeredCustomer.ID, SystemLogInterface.MainSiteService, request.Username, registeredCustomer.Subscriptions.FirstOrDefault().SubscriberNo));
                     db.SaveChanges();
