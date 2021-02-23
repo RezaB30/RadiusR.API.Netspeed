@@ -120,6 +120,9 @@
   <data name="AlreadyHaveCustomer" xml:space="preserve">
     <value>Müşteri zaten kayıtlı</value>
   </data>
+  <data name="AlreadyHaveRequest" xml:space="preserve">
+    <value>Kayıtlı talebiniz bulunmaktadır. Daha sonra tekrar deneyiniz.</value>
+  </data>
   <data name="AuthenticationFailed" xml:space="preserve">
     <value>Doğrulama Başarısız</value>
   </data>

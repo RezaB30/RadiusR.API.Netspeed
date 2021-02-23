@@ -70,6 +70,15 @@ namespace RadiusR.API.Netspeed.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You have already registered request. Please try again later..
+        /// </summary>
+        public static string AlreadyHaveRequest {
+            get {
+                return ResourceManager.GetString("AlreadyHaveRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Authentication Failed.
         /// </summary>
         public static string AuthenticationFailed {

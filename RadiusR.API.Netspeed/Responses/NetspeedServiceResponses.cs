@@ -47,4 +47,21 @@ namespace RadiusR.API.Netspeed.Responses
             }
         }
     }
+    [DataContract]
+    public partial class NetspeedServiceGenericValidateResponse : BaseResponse<bool?, SHA1>
+    {
+        public NetspeedServiceGenericValidateResponse(string passwordHash, BaseRequest<SHA1> baseRequest) : base(passwordHash, baseRequest) { }
+        [DataMember]
+        public bool? ValidateResult
+        {
+            get
+            {
+                return Data;
+            }
+            set
+            {
+                Data = value;
+            }
+        }
+    }
 }

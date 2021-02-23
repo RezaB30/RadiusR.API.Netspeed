@@ -12,7 +12,7 @@ using System.Web;
 /// 
 namespace RadiusR.API.Netspeed.Requests
 {
-    
+
 
     [DataContract]
     public partial class NetspeedServicePayBillsRequest : BaseRequest<long[], SHA1>
@@ -42,5 +42,11 @@ namespace RadiusR.API.Netspeed.Requests
                 Data = value;
             }
         }
+    }
+    [DataContract]
+    public partial class NetspeedServiceCheckRegisteredCustomerRequest : BaseRequest<string, SHA1>
+    {
+        [DataMember]
+        public string PhoneNo { get { return Data; } set { Data = value; } }
     }
 }

@@ -10,11 +10,11 @@ namespace RadiusR.API.Netspeed
     {
         static MemoryCache _cache = new MemoryCache("register");
         static string _namePrefix = "REG_";
-        public static void Set(string password, string key, TimeSpan duration)
+        public static void Set(string value, string key, TimeSpan duration)
         {
             if (_cache.Get(key) == null)
             {
-                _cache.Set(_namePrefix + key, password, GetPolicy(duration));
+                _cache.Set(_namePrefix + key, value, GetPolicy(duration));
             }
         }
         public static string Get(string key)

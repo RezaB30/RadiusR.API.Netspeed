@@ -66,5 +66,7 @@ namespace RadiusR.API.Netspeed
         NetspeedServiceGenericAppSettingsResponse GenericAppSettings(NetspeedServiceGenericAppSettingsRequest request);
         [OperationContract]
         NetspeedServiceIDCardValidationResponse IDCardValidation(NetspeedServiceIDCardValidationRequest request);
+        [OperationContract]
+        NetspeedServiceGenericValidateResponse CheckRegisteredCustomer(NetspeedServiceCheckRegisteredCustomerRequest request);
     }
 }

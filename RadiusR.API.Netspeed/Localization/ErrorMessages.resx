@@ -120,6 +120,9 @@
   <data name="AlreadyHaveCustomer" xml:space="preserve">
     <value>Customer already registered</value>
   </data>
+  <data name="AlreadyHaveRequest" xml:space="preserve">
+    <value>You have already registered request. Please try again later.</value>
+  </data>
   <data name="AuthenticationFailed" xml:space="preserve">
     <value>Authentication Failed</value>
   </data>
