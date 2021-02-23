@@ -1288,7 +1288,7 @@ namespace RadiusR.API.Netspeed
                 }
                 var randomPassword = random.Next(100000, 999999);
                 SMSService SMS = new SMSService();
-                SMS.SendGenericSMS(request.SendGenericSMSParameters.CustomerPhoneNo, request.Culture, rawText: string.Format(Localization.Common.RegisterSMS, randomPassword, Properties.Settings.Default.PasswordDuration));
+                SMS.SendGenericSMS(request.SendGenericSMSParameters.CustomerPhoneNo, request.Culture, rawText: string.Format(Localization.Common.ResourceManager.GetString("RegisterSMS", CultureInfo.CreateSpecificCulture(request.Culture)), randomPassword, Properties.Settings.Default.PasswordDuration));
                 SMSLogger.LogInfo(request.Username, $"Sent sms to {request.SendGenericSMSParameters.CustomerPhoneNo} . password is {randomPassword}");
                 return new NetspeedServiceSendGenericSMSResponse(passwordHash, request)
                 {
