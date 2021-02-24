@@ -28,7 +28,25 @@ namespace RadiusR.API.Netspeed.Requests
         public CorporateCustomerInfo CorporateCustomerInfo { get; set; }
         [DataMember]
         public SubscriptionRegistrationInfo SubscriptionInfo { get; set; }
+        [DataMember]
+        public ExtraInfo ExtraInfo { get; set; }
 
+    }
+    [DataContract]
+    public class ExtraInfo
+    {
+        [DataMember]
+        public int? ApplicationType { get; set; }
+        [DataMember]
+        public string XDSLNo { get; set; }
+        [DataMember]
+        public string ChurnOperatorName { get; set; }
+        [DataMember]
+        public string PSTN { get; set; }
+        [DataMember]
+        public int? WantModem { get; set; }
+        [DataMember]
+        public int? StaticIP { get; set; }
     }
     [DataContract]
     public class IDCardInfo

@@ -1033,7 +1033,10 @@ namespace RadiusR.API.Netspeed
                             {
                                 ReferenceNo = request.CustomerRegisterParameters.SubscriptionInfo.ReferralDiscountInfo.ReferenceNo,
                                 SpecialOfferID = currentSpecialOfferId
-                            }
+                            },
+                            RegistrationType = (SubscriptionRegistrationType)register.ExtraInfo.ApplicationType,
+                            TransitionPSTN = register.ExtraInfo.PSTN,
+                            TransitionXDSLNo = register.ExtraInfo.XDSLNo
                         },
                     };
 
@@ -1070,7 +1073,7 @@ namespace RadiusR.API.Netspeed
                             var curSubscriberNo = currentCustomer.Subscriptions.Where(s => s.State == (short)RadiusR.DB.Enums.CustomerState.PreRegisterd).FirstOrDefault() == null ?
                                 currentCustomer.Subscriptions.FirstOrDefault().SubscriberNo :
                                 currentCustomer.Subscriptions.Where(s => s.State == (short)RadiusR.DB.Enums.CustomerState.PreRegisterd).FirstOrDefault().SubscriberNo;
-                            db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.AddSubscription(null, curSubscriptionId, currentCustomer.ID, SystemLogInterface.MainSiteService, $"{request.Username} ({curSubscriberNo})", curSubscriberNo));
+                            db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.AddSubscription(null, curSubscriptionId, currentCustomer.ID,(SubscriptionRegistrationType)register.ExtraInfo.ApplicationType, SystemLogInterface.MainSiteService, $"{request.Username} ({curSubscriberNo})", curSubscriberNo));
                             db.SaveChanges();
                             return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                             {
@@ -1086,7 +1089,7 @@ namespace RadiusR.API.Netspeed
                     }
                     db.Customers.Add(registeredCustomer);
                     db.SaveChanges();
-                    db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.AddSubscription(null, registeredCustomer.Subscriptions.FirstOrDefault().ID, registeredCustomer.ID, SystemLogInterface.MainSiteService, request.Username, registeredCustomer.Subscriptions.FirstOrDefault().SubscriberNo));
+                    db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.AddSubscription(null, registeredCustomer.Subscriptions.FirstOrDefault().ID, registeredCustomer.ID, (SubscriptionRegistrationType)register.ExtraInfo.ApplicationType, SystemLogInterface.MainSiteService, request.Username, registeredCustomer.Subscriptions.FirstOrDefault().SubscriberNo));
                     db.SaveChanges();
                     return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                     {
@@ -1187,9 +1190,7 @@ namespace RadiusR.API.Netspeed
                     if (request.PayBillsParameters == null)
                         return new NetspeedServicePayBillsResponse(passwordHash, request)
                         {
-
                             PayBillsResponse = null,
-
                             ResponseMessage = CommonResponse.BillsNotFoundException(request.Culture)
                         };
                     if (request.PayBillsParameters.Count() == 0)
