@@ -1078,6 +1078,24 @@ namespace RadiusR.API.Netspeed.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Port Available.
+        /// </summary>
+        public static string PortAvailable {
+            get {
+                return ResourceManager.GetString("PortAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port Not Availabe.
+        /// </summary>
+        public static string PortNotAvailable {
+            get {
+                return ResourceManager.GetString("PortNotAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Port State.
         /// </summary>
         public static string PortState {
@@ -1168,7 +1186,7 @@ namespace RadiusR.API.Netspeed.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Yeni kayıt başvurunuz için şifreniz {0}.
+        ///   Looks up a localized string similar to New register password is {0}.
         /// </summary>
         public static string RegisterSMS {
             get {

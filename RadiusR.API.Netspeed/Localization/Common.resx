@@ -456,6 +456,12 @@
   <data name="PleaseWait" xml:space="preserve">
     <value>Processing...Please Wait...</value>
   </data>
+  <data name="PortAvailable" xml:space="preserve">
+    <value>Port Available</value>
+  </data>
+  <data name="PortNotAvailable" xml:space="preserve">
+    <value>Port Not Availabe</value>
+  </data>
   <data name="PortState" xml:space="preserve">
     <value>Port State</value>
   </data>
@@ -487,7 +493,7 @@
     <value>Reference No</value>
   </data>
   <data name="RegisterSMS" xml:space="preserve">
-    <value>Yeni kayıt başvurunuz için şifreniz {0}</value>
+    <value>New register password is {0}</value>
   </data>
   <data name="RemainingCount" xml:space="preserve">
     <value>Remaining</value>

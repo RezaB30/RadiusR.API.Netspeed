@@ -27,6 +27,7 @@ namespace RadiusR.API.Netspeed
 {
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "Service1" in code, svc and config file together.
     // NOTE: In order to launch WCF Test Client for testing this service, please select Service1.svc or Service1.svc.cs at the Solution Explorer and start debugging.
+    [ServiceBehavior(AddressFilterMode = AddressFilterMode.Any)]
     public class MainSiteService : IMainSiteService
     {
         readonly RadiusR.Address.AddressManager AddressClient = new RadiusR.Address.AddressManager();
@@ -209,7 +210,7 @@ namespace RadiusR.API.Netspeed
                             {
                                 HasInfrastructureAdsl = HasInfrastructureAdsl,
                                 AdslDistance = availabAdsl.InternalException == null ? availabAdsl.Data.Description.Distance : null,
-                                AdslPortState = availabAdsl.InternalException == null ? RadiusR.Localization.Lists.PortState.ResourceManager.GetString(availabAdsl.Data.Description.PortState.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)) : RadiusR.Localization.Lists.PortState.ResourceManager.GetString(AvailabilityServiceClient.PortState.NotAvailable.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)),
+                                AdslPortState = availabAdsl.InternalException == null ? availabAdsl.Data.Description.PortState == AvailabilityServiceClient.PortState.Available ? Localization.Common.ResourceManager.GetString("PortAvailable",CultureInfo.CreateSpecificCulture(request.Culture)) : Localization.Common.ResourceManager.GetString("PortNotAvailable", CultureInfo.CreateSpecificCulture(request.Culture)) : Localization.Common.ResourceManager.GetString("PortNotAvailable", CultureInfo.CreateSpecificCulture(request.Culture)),
                                 AdslSpeed = availabAdsl.InternalException == null ? availabAdsl.Data.Description.DSLMaxSpeed : null,
                                 AdslSVUID = availabAdsl.InternalException == null ? availabAdsl.Data.Description.SVUID : "-",
                             },
@@ -217,7 +218,7 @@ namespace RadiusR.API.Netspeed
                             {
                                 HasInfrastructureVdsl = HasInfrastructureVdsl,
                                 VdslDistance = availabVdsl.InternalException == null ? availabVdsl.Data.Description.Distance : null,
-                                VdslPortState = availabVdsl.InternalException == null ? RadiusR.Localization.Lists.PortState.ResourceManager.GetString(availabVdsl.Data.Description.PortState.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)) : RadiusR.Localization.Lists.PortState.ResourceManager.GetString(AvailabilityServiceClient.PortState.NotAvailable.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)),
+                                VdslPortState = availabVdsl.InternalException == null ? availabVdsl.Data.Description.PortState == AvailabilityServiceClient.PortState.Available ? Localization.Common.ResourceManager.GetString("PortAvailable", CultureInfo.CreateSpecificCulture(request.Culture)) : Localization.Common.ResourceManager.GetString("PortNotAvailable", CultureInfo.CreateSpecificCulture(request.Culture)) : Localization.Common.ResourceManager.GetString("PortNotAvailable", CultureInfo.CreateSpecificCulture(request.Culture)),
                                 VdslSpeed = availabVdsl.InternalException == null ? availabVdsl.Data.Description.DSLMaxSpeed : null,
                                 VdslSVUID = availabVdsl.InternalException == null ? availabVdsl.Data.Description.SVUID : "-",
                             },
@@ -225,7 +226,7 @@ namespace RadiusR.API.Netspeed
                             {
                                 HasInfrastructureFiber = HasInfrastructureFiber,
                                 FiberDistance = availabFiber.InternalException == null ? availabFiber.Data.Description.Distance : null,
-                                FiberPortState = availabFiber.InternalException == null ? RadiusR.Localization.Lists.PortState.ResourceManager.GetString(availabFiber.Data.Description.PortState.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)) : RadiusR.Localization.Lists.PortState.ResourceManager.GetString(AvailabilityServiceClient.PortState.NotAvailable.ToString(), CultureInfo.CreateSpecificCulture(request.Culture)),
+                                FiberPortState = availabFiber.InternalException == null ? availabFiber.Data.Description.PortState == AvailabilityServiceClient.PortState.Available ? Localization.Common.ResourceManager.GetString("PortAvailable", CultureInfo.CreateSpecificCulture(request.Culture)) : Localization.Common.ResourceManager.GetString("PortNotAvailable", CultureInfo.CreateSpecificCulture(request.Culture)) : Localization.Common.ResourceManager.GetString("PortNotAvailable", CultureInfo.CreateSpecificCulture(request.Culture)),
                                 FiberSpeed = availabFiber.InternalException == null ? availabFiber.Data.Description.DSLMaxSpeed : null,
                                 FiberSVUID = availabFiber.InternalException == null ? availabFiber.Data.Description.SVUID : "-",
                             },
