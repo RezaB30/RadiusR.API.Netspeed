@@ -129,6 +129,10 @@
   <data name="BillsNotFound" xml:space="preserve">
     <value>Can't be empty bill id list</value>
   </data>
+  <data name="ContractAvailableCustomer" xml:space="preserve">
+    <value>Üzgünüz! Talebiniz Gönderilemedi.
+Değerli Abonemiz, destek ve diğer tüm taleplerinizi Online İşlem Merkezi üzerinden gerçekleştirebilirsiniz.</value>
+  </data>
   <data name="Failed" xml:space="preserve">
     <value>Failed</value>
   </data>

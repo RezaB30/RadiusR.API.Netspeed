@@ -64,4 +64,21 @@ namespace RadiusR.API.Netspeed.Responses
             }
         }
     }
+    [DataContract]
+    public partial class NetspeedServiceAvailableChurnResponse : BaseResponse<bool, SHA1>
+    {
+        public NetspeedServiceAvailableChurnResponse(string passwordHash, BaseRequest<SHA1> baseRequest) : base(passwordHash, baseRequest) { }
+        [DataMember]
+        public bool IsAvailable
+        {
+            get
+            {
+                return Data;
+            }
+            set
+            {
+                Data = value;
+            }
+        }
+    }
 }

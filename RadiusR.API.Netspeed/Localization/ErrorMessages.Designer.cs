@@ -97,6 +97,16 @@ namespace RadiusR.API.Netspeed.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Üzgünüz! Talebiniz Gönderilemedi.
+        ///Değerli Abonemiz, destek ve diğer tüm taleplerinizi Online İşlem Merkezi üzerinden gerçekleştirebilirsiniz..
+        /// </summary>
+        public static string ContractAvailableCustomer {
+            get {
+                return ResourceManager.GetString("ContractAvailableCustomer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed.
         /// </summary>
         public static string Failed {

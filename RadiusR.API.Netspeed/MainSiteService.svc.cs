@@ -22,6 +22,8 @@ using System.ServiceModel.Web;
 using System.Text;
 using System.Threading;
 using RezaB.API.WebService.NLogExtentions;
+using RadiusR.DB.ModelExtentions;
+using RezaB.TurkTelekom.WebServices.TTChurnApplication;
 
 namespace RadiusR.API.Netspeed
 {
@@ -94,6 +96,15 @@ namespace RadiusR.API.Netspeed
                     var IsValid = request.HasValidHash(passwordHash, new ServiceSettings().Duration());
                     if (IsValid)
                     {
+                        var availableCustomer = db.Customers.Where(c => c.ContactPhoneNo == request.CustomerContactParameters.PhoneNo && c.Subscriptions.Select(s => s.State).Contains((short)CustomerState.Active)).FirstOrDefault() != null;
+                        if (availableCustomer)
+                        {
+                            return new NetspeedServiceRegisterCustomerContactResponse(passwordHash, request)
+                            {
+                                RegisterCustomerContactResponse = false,
+                                ResponseMessage = CommonResponse.FailedResponse(request.Culture, Localization.ErrorMessages.ResourceManager.GetString("ContractAvailableCustomer", CultureInfo.CreateSpecificCulture(request.Culture)))
+                            };
+                        }
                         var hasRegister = string.IsNullOrEmpty(CacheManager.Get(request.CustomerContactParameters.PhoneNo)) == false;
                         if (hasRegister)
                         {
@@ -210,7 +221,7 @@ namespace RadiusR.API.Netspeed
                             {
                                 HasInfrastructureAdsl = HasInfrastructureAdsl,
                                 AdslDistance = availabAdsl.InternalException == null ? availabAdsl.Data.Description.Distance : null,
-                                AdslPortState = availabAdsl.InternalException == null ? availabAdsl.Data.Description.PortState == AvailabilityServiceClient.PortState.Available ? Localization.Common.ResourceManager.GetString("PortAvailable",CultureInfo.CreateSpecificCulture(request.Culture)) : Localization.Common.ResourceManager.GetString("PortNotAvailable", CultureInfo.CreateSpecificCulture(request.Culture)) : Localization.Common.ResourceManager.GetString("PortNotAvailable", CultureInfo.CreateSpecificCulture(request.Culture)),
+                                AdslPortState = availabAdsl.InternalException == null ? availabAdsl.Data.Description.PortState == AvailabilityServiceClient.PortState.Available ? Localization.Common.ResourceManager.GetString("PortAvailable", CultureInfo.CreateSpecificCulture(request.Culture)) : Localization.Common.ResourceManager.GetString("PortNotAvailable", CultureInfo.CreateSpecificCulture(request.Culture)) : Localization.Common.ResourceManager.GetString("PortNotAvailable", CultureInfo.CreateSpecificCulture(request.Culture)),
                                 AdslSpeed = availabAdsl.InternalException == null ? availabAdsl.Data.Description.DSLMaxSpeed : null,
                                 AdslSVUID = availabAdsl.InternalException == null ? availabAdsl.Data.Description.SVUID : "-",
                             },
@@ -662,8 +673,14 @@ namespace RadiusR.API.Netspeed
                             {
                                 return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
                                 {
-
-
+                                    ResponseMessage = CommonResponse.HasMoreSubscription(request.Culture),
+                                    SubscriberGetBillsResponse = null,
+                                };
+                            }
+                            if (!dbClient.FirstOrDefault().HasBilling)
+                            {
+                                return new NetspeedServiceSubscriberGetBillsResponse(passwordHash, request)
+                                {
                                     ResponseMessage = CommonResponse.HasMoreSubscription(request.Culture),
                                     SubscriberGetBillsResponse = null,
                                 };
@@ -1040,63 +1057,138 @@ namespace RadiusR.API.Netspeed
                             TransitionXDSLNo = register.ExtraInfo.XDSLNo
                         },
                     };
-
-                    var result = RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration.Registration.RegisterSubscriptionWithNewCustomer(db, registrationInfo, out registeredCustomer);
-                    Dictionary<string, string> valuePairs = new Dictionary<string, string>();
-
-                    if (result != null)
+                    // test
+                    var getCustomer = db.Customers.Where(c => c.CustomerIDCard.TCKNo == request.CustomerRegisterParameters.IDCardInfo.TCKNo).FirstOrDefault();
+                    if (getCustomer == null)
                     {
-                        var dic = result.ToDictionary(x => x.Key, x => x.ToArray());
-                        foreach (var item in dic)
-                        {
-                            valuePairs.Add(item.Key, string.Join("-", item.Value));
-                        }
-                        return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
-                        {
-                            NewCustomerRegisterResponse = valuePairs,
+                        var result = RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration.Registration.RegisterSubscriptionWithNewCustomer(db, registrationInfo, out registeredCustomer);
+                        Dictionary<string, string> valuePairs = new Dictionary<string, string>();
 
-                            ResponseMessage = CommonResponse.FailedResponse(request.Culture),
-
-                        };
-                    }
-                    if (registeredCustomer == null)
-                    {
-                        var currentCustomer = db.Customers.Where(c => c.CustomerIDCard.TCKNo == register.IDCardInfo.TCKNo
-                        && (c.Subscriptions.Where(s => s.State == (short)RadiusR.DB.Enums.CustomerState.Active || s.State == (short)RadiusR.DB.Enums.CustomerState.Disabled
-                        || s.State == (short)RadiusR.DB.Enums.CustomerState.PreRegisterd || s.State == (short)RadiusR.DB.Enums.CustomerState.Registered
-                        || s.State == (short)RadiusR.DB.Enums.CustomerState.Reserved).FirstOrDefault() == null)).FirstOrDefault(); // if not null registered else not registered
-                        if (currentCustomer != null)
+                        if (!result.IsSuccess)
                         {
-                            db.SaveChanges();
-                            var curSubscriptionId = currentCustomer.Subscriptions.Where(s => s.State == (short)RadiusR.DB.Enums.CustomerState.PreRegisterd).FirstOrDefault() == null ?
-                                currentCustomer.Subscriptions.FirstOrDefault().ID :
-                                currentCustomer.Subscriptions.Where(s => s.State == (short)RadiusR.DB.Enums.CustomerState.PreRegisterd).FirstOrDefault().ID;
-                            var curSubscriberNo = currentCustomer.Subscriptions.Where(s => s.State == (short)RadiusR.DB.Enums.CustomerState.PreRegisterd).FirstOrDefault() == null ?
-                                currentCustomer.Subscriptions.FirstOrDefault().SubscriberNo :
-                                currentCustomer.Subscriptions.Where(s => s.State == (short)RadiusR.DB.Enums.CustomerState.PreRegisterd).FirstOrDefault().SubscriberNo;
-                            db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.AddSubscription(null, curSubscriptionId, currentCustomer.ID,(SubscriptionRegistrationType)register.ExtraInfo.ApplicationType, SystemLogInterface.MainSiteService, $"{request.Username} ({curSubscriberNo})", curSubscriberNo));
-                            db.SaveChanges();
+                            var dic = result.ValidationMessages?.ToDictionary(x => x.Key, x => x.ToArray());
+                            foreach (var item in dic)
+                            {
+                                valuePairs.Add(item.Key, string.Join("-", item.Value));
+                            }
+                            Errorslogger.LogException(request.Username, new Exception($"register new customer exception. Customer TCK : {request.CustomerRegisterParameters.IDCardInfo.TCKNo} -> {string.Join(",", valuePairs.Select(v => v.Key + " " + v.Value).ToArray())}"));
                             return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                             {
                                 NewCustomerRegisterResponse = valuePairs,
-                                ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+
+                                ResponseMessage = CommonResponse.FailedResponse(request.Culture),
+
                             };
                         }
+                        db.Customers.Add(registeredCustomer);
+                        db.SaveChanges();
+                        db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.AddSubscription(null, registeredCustomer.Subscriptions.FirstOrDefault().ID, registeredCustomer.ID, (SubscriptionRegistrationType)register.ExtraInfo.ApplicationType, SystemLogInterface.MainSiteService, request.Username, registeredCustomer.Subscriptions.FirstOrDefault().SubscriberNo));
+                        db.SaveChanges();
                         return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
                         {
-                            ResponseMessage = CommonResponse.HaveAlreadyCustomer(request.Culture),
-                            NewCustomerRegisterResponse = null
+                            NewCustomerRegisterResponse = valuePairs,
+                            ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
                         };
                     }
-                    db.Customers.Add(registeredCustomer);
-                    db.SaveChanges();
-                    db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.AddSubscription(null, registeredCustomer.Subscriptions.FirstOrDefault().ID, registeredCustomer.ID, (SubscriptionRegistrationType)register.ExtraInfo.ApplicationType, SystemLogInterface.MainSiteService, request.Username, registeredCustomer.Subscriptions.FirstOrDefault().SubscriberNo));
-                    db.SaveChanges();
-                    return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+                    else
                     {
-                        NewCustomerRegisterResponse = valuePairs,
-                        ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
-                    };
+                        var dbSubscriptions = getCustomer.Subscriptions.Where(s => s.State == (short)CustomerState.PreRegisterd
+                        || s.State == (short)CustomerState.Registered
+                        || s.State == (short)CustomerState.Reserved).FirstOrDefault();
+
+                        if (dbSubscriptions != null)
+                        {
+                            return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+                            {
+                                NewCustomerRegisterResponse = null,
+                                ResponseMessage = CommonResponse.HaveAlreadyCustomer(request.Culture),
+                            };
+                        }
+                        var result = RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration.Registration.RegisterSubscriptionForExistingCustomer(db, registrationInfo.SubscriptionInfo, getCustomer);
+                        Dictionary<string, string> valuePairs = new Dictionary<string, string>();
+                        if (!result.IsSuccess)
+                        {
+                            var dic = result.ValidationMessages?.ToDictionary(x => x.Key, x => x.ToArray());
+                            foreach (var item in dic)
+                            {
+                                valuePairs.Add(item.Key, string.Join("-", item.Value));
+                            }
+                            Errorslogger.LogException(request.Username, new Exception($"register existing customer exception. Customer TCK : {request.CustomerRegisterParameters.IDCardInfo.TCKNo} -> {string.Join(",", valuePairs.Select(v => v.Key + " " + v.Value).ToArray())}"));
+                            return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+                            {
+                                NewCustomerRegisterResponse = valuePairs,
+
+                                ResponseMessage = CommonResponse.FailedResponse(request.Culture),
+
+                            };
+                        }
+                        db.SaveChanges();
+                        var currentSubscriberNo = getCustomer.Subscriptions.Where(s => s.State == (short)CustomerState.Active).FirstOrDefault() != null ? getCustomer.Subscriptions.Where(s => s.State == (short)CustomerState.Active).FirstOrDefault().SubscriberNo : getCustomer.Subscriptions.FirstOrDefault().SubscriberNo;
+                        db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.AddSubscription(null, getCustomer.ID, getCustomer.ID, (SubscriptionRegistrationType)request.CustomerRegisterParameters.ExtraInfo.ApplicationType, SystemLogInterface.CustomerWebsite, $"{request.Username} ({currentSubscriberNo})", currentSubscriberNo));
+                        db.SaveChanges();
+                        return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+                        {
+                            NewCustomerRegisterResponse = valuePairs,
+                            ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                        };
+                    }
+                    //
+                    //var result = RadiusR.DB.Utilities.ComplexOperations.Subscriptions.Registration.Registration.RegisterSubscriptionWithNewCustomer(db, registrationInfo, out registeredCustomer);
+                    //Dictionary<string, string> valuePairs = new Dictionary<string, string>();
+
+                    //if (result != null)
+                    //{
+                    //    var dic = result.ToDictionary(x => x.Key, x => x.ToArray());
+                    //    foreach (var item in dic)
+                    //    {
+                    //        valuePairs.Add(item.Key, string.Join("-", item.Value));
+                    //    }
+                    //    return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+                    //    {
+                    //        NewCustomerRegisterResponse = valuePairs,
+
+                    //        ResponseMessage = CommonResponse.FailedResponse(request.Culture),
+
+                    //    };
+                    //}
+                    //if (registeredCustomer == null)
+                    //{
+                    //    var currentCustomer = db.Customers.Where(c => c.CustomerIDCard.TCKNo == register.IDCardInfo.TCKNo
+                    //    && (c.Subscriptions.Where(s => s.State == (short)RadiusR.DB.Enums.CustomerState.Active || s.State == (short)RadiusR.DB.Enums.CustomerState.Disabled
+                    //    || s.State == (short)RadiusR.DB.Enums.CustomerState.PreRegisterd || s.State == (short)RadiusR.DB.Enums.CustomerState.Registered
+                    //    || s.State == (short)RadiusR.DB.Enums.CustomerState.Reserved).FirstOrDefault() == null)).FirstOrDefault(); // if not null registered else not registered
+                    //    if (currentCustomer != null)
+                    //    {                            
+                    //        db.SaveChanges();
+                    //        var curSubscriptionId = currentCustomer.Subscriptions.Where(s => s.State == (short)RadiusR.DB.Enums.CustomerState.PreRegisterd).FirstOrDefault() == null ?
+                    //            currentCustomer.Subscriptions.FirstOrDefault().ID :
+                    //            currentCustomer.Subscriptions.Where(s => s.State == (short)RadiusR.DB.Enums.CustomerState.PreRegisterd).FirstOrDefault().ID;
+                    //        var curSubscriberNo = currentCustomer.Subscriptions.Where(s => s.State == (short)RadiusR.DB.Enums.CustomerState.PreRegisterd).FirstOrDefault() == null ?
+                    //            currentCustomer.Subscriptions.FirstOrDefault().SubscriberNo :
+                    //            currentCustomer.Subscriptions.Where(s => s.State == (short)RadiusR.DB.Enums.CustomerState.PreRegisterd).FirstOrDefault().SubscriberNo;
+                    //        db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.AddSubscription(null, curSubscriptionId, currentCustomer.ID, (SubscriptionRegistrationType)register.ExtraInfo.ApplicationType, SystemLogInterface.MainSiteService, $"{request.Username} ({curSubscriberNo})", curSubscriberNo));
+                    //        db.SaveChanges();
+                    //        return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+                    //        {
+                    //            NewCustomerRegisterResponse = valuePairs,
+                    //            ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                    //        };
+                    //    }
+                    //    return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+                    //    {
+                    //        ResponseMessage = CommonResponse.HaveAlreadyCustomer(request.Culture),
+                    //        NewCustomerRegisterResponse = null
+                    //    };
+                    //}
+                    //db.Customers.Add(registeredCustomer);
+                    //db.SaveChanges();
+                    //db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.AddSubscription(null, registeredCustomer.Subscriptions.FirstOrDefault().ID, registeredCustomer.ID, (SubscriptionRegistrationType)register.ExtraInfo.ApplicationType, SystemLogInterface.MainSiteService, request.Username, registeredCustomer.Subscriptions.FirstOrDefault().SubscriberNo));
+                    //db.SaveChanges();
+                    //return new NetspeedServiceNewCustomerRegisterResponse(passwordHash, request)
+                    //{
+                    //    NewCustomerRegisterResponse = valuePairs,
+                    //    ResponseMessage = CommonResponse.SuccessResponse(request.Culture),
+                    //};
                 }
             }
             catch (NullReferenceException ex)
@@ -1224,12 +1316,32 @@ namespace RadiusR.API.Netspeed
                             PayBillsResponse = null,
                         };
                     }
+                    // payable amount
+                    var dbSubscription = db.Subscriptions.Find(Bills.FirstOrDefault().SubscriptionID);
+                    var creditsAmount = dbSubscription.SubscriptionCredits.Sum(credit => credit.Amount);
+                    var bills = dbSubscription.Bills.Where(bill => bill.BillStatusID == (short)BillState.Unpaid).OrderBy(bill => bill.IssueDate).AsEnumerable();
+                    bills = bills.Where(bill => request.PayBillsParameters.Contains(bill.ID)).ToArray();
+                    var billsAmount = bills.Sum(bill => bill.GetPayableCost());
+                    var payableAmount = Math.Max(0m, billsAmount - creditsAmount);
+                    // payable result
+
                     var payResponse = RadiusR.DB.Utilities.Billing.BillPayment.PayBills(db, Bills, PaymentType.VirtualPos, BillPayment.AccountantType.Admin);
                     db.SystemLogs.Add(RadiusR.SystemLogs.SystemLogProcessor.BillPayment(Bills.Select(b => b.ID).ToArray(), null, Bills.FirstOrDefault().SubscriptionID, SystemLogInterface.MainSiteService, request.Username, PaymentType.VirtualPos));
                     db.SaveChanges();
                     if (payResponse == BillPayment.ResponseType.Success)
                     {
                         PaidLogger.LogInfo(request.Username, $"Paid Successful. Bills : {string.Join("-", Bills.Select(b => b.ID.ToString()))}");
+
+                        //billed sub                                                
+                        RadiusR.SMS.SMSService SMSService = new SMSService();
+                        db.SMSArchives.AddSafely(SMSService.SendSubscriberSMS(dbSubscription, SMSType.PaymentDone, new Dictionary<string, object>()
+                        {
+                            { SMSParamaterRepository.SMSParameterNameCollection.BillTotal, payableAmount }
+                        }));
+                        db.SaveChanges();
+
+                        SMSLogger.LogInfo(request.Username, $"Send Payment SMS. Payable Cost : {payableAmount} | Bill ids : {string.Join(",", request.PayBillsParameters)}");
+                        //
                         return new NetspeedServicePayBillsResponse(passwordHash, request)
                         {
                             PayBillsResponse = new PayBillsResponse()
@@ -1774,6 +1886,60 @@ namespace RadiusR.API.Netspeed
                 {
                     ResponseMessage = CommonResponse.InternalException(request.Culture),
                     ValidateResult = false,
+                };
+            }
+        }
+
+        public NetspeedServiceAvailableChurnResponse AvailableChurn(NetspeedServiceAvailableChurnRequest request)
+        {
+            var password = new ServiceSettings().Password(request.Username);
+            var passwordHash = HashUtilities.GetHexString<SHA1>(password);
+            try
+            {
+                InComingLogger.LogIncomingMessage(request);
+                if (!request.HasValidHash(passwordHash, new ServiceSettings().Duration()))
+                {
+                    //Errorslogger.Error($"unauthorize error. User : {request.Username}");
+                    Errorslogger.LogException(request.Username, new Exception("unauthorize error"));
+                    return new NetspeedServiceAvailableChurnResponse(passwordHash, request)
+                    {
+                        IsAvailable = false,
+                        ResponseMessage = CommonResponse.UnauthorizedResponse(request.Culture),
+                    };
+                }
+                if (string.IsNullOrEmpty(request.XDSLNo))
+                {
+                    return new NetspeedServiceAvailableChurnResponse(passwordHash, request)
+                    {
+                        ResponseMessage = CommonResponse.NullObjectException(request.Culture),
+                        IsAvailable = false
+                    };
+                }
+                var credentials = RadiusR.DB.DomainsCache.DomainsCache.GetDomainByID(CustomerWebsiteSettings.WebsiteServicesInfrastructureDomainID);
+                TTChurnApplicationClient client = new TTChurnApplicationClient(credentials.TelekomCredential.XDSLWebServiceUsernameInt, credentials.TelekomCredential.XDSLWebServicePassword);
+                var response = client.ChurnAvailability(request.XDSLNo);
+                if (response.InternalException != null)
+                {
+                    Errorslogger.LogException(request.Username, response.InternalException);
+                    return new NetspeedServiceAvailableChurnResponse(passwordHash, request)
+                    {
+                        ResponseMessage = CommonResponse.FailedResponse(request.Culture),
+                        IsAvailable = false
+                    };
+                }
+                return new NetspeedServiceAvailableChurnResponse(passwordHash, request)
+                {
+                    IsAvailable = response.Data.IsValid,
+                    ResponseMessage = CommonResponse.SuccessResponse(request.Culture)
+                };
+            }
+            catch (Exception ex)
+            {
+                Errorslogger.LogException(request.Username, ex);
+                return new NetspeedServiceAvailableChurnResponse(passwordHash, request)
+                {
+                    ResponseMessage = CommonResponse.InternalException(request.Culture),
+                    IsAvailable = false,
                 };
             }
         }
