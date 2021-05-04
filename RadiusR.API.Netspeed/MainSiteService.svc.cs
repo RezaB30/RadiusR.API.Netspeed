@@ -1916,8 +1916,9 @@ namespace RadiusR.API.Netspeed
                     };
                 }
                 var credentials = RadiusR.DB.DomainsCache.DomainsCache.GetDomainByID(CustomerWebsiteSettings.WebsiteServicesInfrastructureDomainID);
-                TTChurnApplicationClient client = new TTChurnApplicationClient(credentials.TelekomCredential.XDSLWebServiceUsernameInt, credentials.TelekomCredential.XDSLWebServicePassword);
-                var response = client.ChurnAvailability(request.XDSLNo);
+
+                RezaB.TurkTelekom.WebServices.TTChurnApplication.TransitionApplicationClient client = new TransitionApplicationClient(credentials.TelekomCredential.XDSLWebServiceUsernameInt, credentials.TelekomCredential.XDSLWebServicePassword,credentials.TelekomCredential.XDSLWebServiceCustomerCodeInt);
+                var response = client.ValidateTransition(request.XDSLNo);
                 if (response.InternalException != null)
                 {
                     Errorslogger.LogException(request.Username, response.InternalException);
